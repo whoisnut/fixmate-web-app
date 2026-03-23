@@ -27,23 +27,29 @@ class _SplashScreenState extends State<SplashScreen> {
     if (mounted) {
       if (token != null) {
         try {
-          final response = await ApiClient().getBookings();
+          final response = await ApiClient().getBookings().timeout(
+                const Duration(seconds: 5),
+                onTimeout: () => throw Exception('Backend timeout'),
+              );
           if (!mounted) return;
 
           if (response.statusCode == 200) {
             Navigator.pushReplacementNamed(context, AppRoutes.home);
           } else {
+            // Token invalid, go to login
             await prefs.remove(AppConstants.tokenKey);
             await prefs.remove(AppConstants.userKey);
             Navigator.pushReplacementNamed(context, AppRoutes.login);
           }
-        } catch (_) {
+        } catch (e) {
+          print('Auth check error: $e');
           if (!mounted) return;
-          await prefs.remove(AppConstants.tokenKey);
-          await prefs.remove(AppConstants.userKey);
+          // On error, still try to go to home (offline mode)
+          // or go to login if no token
           Navigator.pushReplacementNamed(context, AppRoutes.login);
         }
       } else {
+        // No token, go to onboarding
         Navigator.pushReplacementNamed(context, AppRoutes.onboarding);
       }
     }

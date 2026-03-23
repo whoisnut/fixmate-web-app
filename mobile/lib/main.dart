@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Text;
+import 'package:flutter/material.dart' as flutter_material;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/theme/app_theme.dart';
 import 'core/constants/app_constants.dart';
 import 'features/auth/screens/splash_screen.dart';
@@ -13,7 +15,7 @@ import 'features/profile/screens/profile_screen.dart';
 import 'models/service.dart';
 
 void main() {
-  runApp(const FixMateApp());
+  runApp(const ProviderScope(child: FixMateApp()));
 }
 
 class FixMateApp extends StatelessWidget {
@@ -45,10 +47,10 @@ class FixMateApp extends StatelessWidget {
             );
           case AppRoutes.booking:
             final service = settings.arguments as Map<String, dynamic>;
-            return MaterialPageRoute( 
+            return MaterialPageRoute(
               builder: (_) => BookingScreen(service: service),
             );
-          case AppRoutes.bookingHistory: 
+          case AppRoutes.bookingHistory:
             return MaterialPageRoute(
                 builder: (_) => const BookingHistoryScreen());
           case AppRoutes.profile:
@@ -56,7 +58,7 @@ class FixMateApp extends StatelessWidget {
           default:
             return MaterialPageRoute(
               builder: (_) => Scaffold(
-                body: Center(child: Text('Page not found')),
+                body: Center(child: flutter_material.Text('Page not found')),
               ),
             );
         }

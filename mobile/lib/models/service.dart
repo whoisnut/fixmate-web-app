@@ -41,7 +41,7 @@ class Service {
     this.description,
     required this.minPrice,
     required this.maxPrice,
-    required this.urgencyLevel,
+    required this.urgencyLevel, 
     required this.isActive,
   });
 

@@ -123,6 +123,51 @@ class ApiClient {
     return await dio.put(AppConstants.profileEndpoint, data: data);
   }
 
+  // Booking action endpoints
+  Future<Response> acceptBooking(String bookingId) async {
+    return await dio.post('${AppConstants.bookingsEndpoint}/$bookingId/accept');
+  }
+
+  Future<Response> startBooking(String bookingId) async {
+    return await dio.post('${AppConstants.bookingsEndpoint}/$bookingId/start');
+  }
+
+  Future<Response> completeBooking(String bookingId) async {
+    return await dio
+        .post('${AppConstants.bookingsEndpoint}/$bookingId/complete');
+  }
+
+  Future<Response> getAvailableBookings() async {
+    return await dio.get('${AppConstants.bookingsEndpoint}/available');
+  }
+
+  // Payment endpoints
+  Future<Response> createPayment(Map<String, dynamic> data) async {
+    return await dio.post('/api/payments', data: data);
+  }
+
+  Future<Response> getPayment(String bookingId) async {
+    return await dio.get('/api/payments/$bookingId');
+  }
+
+  Future<Response> updatePaymentStatus(
+    String paymentId,
+    String status, {
+    String? transactionId,
+  }) async {
+    return await dio.put(
+      '/api/payments/$paymentId',
+      queryParameters: {
+        'status': status,
+        if (transactionId != null) 'transaction_id': transactionId,
+      },
+    );
+  }
+
+  Future<Response> getMyPayments() async {
+    return await dio.get('/api/payments/bookings/my-payments');
+  }
+
   // Utility methods
   Future<void> setAuthToken(String token) async {
     _prefs = await SharedPreferences.getInstance();

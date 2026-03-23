@@ -1,13 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/constants/app_constants.dart';
 import '../providers/booking_provider.dart';
 
-class BookingHistoryScreen extends ConsumerWidget {
+class BookingHistoryScreen extends ConsumerStatefulWidget {
   const BookingHistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BookingHistoryScreen> createState() =>
+      _BookingHistoryScreenState();
+}
+
+class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
+  bool _isTechnician = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkUserRole();
+  }
+
+  Future<void> _checkUserRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userJson = prefs.getString(AppConstants.userKey);
+    if (userJson != null) {
+      final userMap = jsonDecode(userJson) as Map<String, dynamic>;
+      setState(() {
+        _isTechnician = userMap['role'] == 'technician';
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final bookingsAsyncValue = ref.watch(bookingsProvider);
 
     return Scaffold(
@@ -69,7 +97,7 @@ class BookingHistoryScreen extends ConsumerWidget {
                   padding: EdgeInsets.all(16),
                   itemCount: bookings.length,
                   itemBuilder: (context, index) {
-                    return _buildBookingCard(bookings[index]);
+                    return _buildBookingCard(context, ref, bookings[index]);
                   },
                 ),
               ),
@@ -77,8 +105,13 @@ class BookingHistoryScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildBookingCard(Map<String, dynamic> booking) {
+  Widget _buildBookingCard(
+    BuildContext context,
+    WidgetRef ref,
+    Map<String, dynamic> booking,
+  ) {
     final status = booking['status'] as String? ?? 'pending';
+    final bookingId = booking['id'] as String? ?? '';
 
     return Card(
       margin: EdgeInsets.only(bottom: 16),
@@ -91,7 +124,7 @@ class BookingHistoryScreen extends ConsumerWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Booking #${(booking['id'] as String? ?? '').substring(0, 8)}',
+                  'Booking #${(bookingId).substring(0, 8)}',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
@@ -136,19 +169,100 @@ class BookingHistoryScreen extends ConsumerWidget {
                     color: AppTheme.success,
                   ),
                 ),
-                if (status == 'completed')
-                  TextButton(
-                    onPressed: () {
-                      // TODO: Navigate to rating screen
-                    },
-                    child: Text('Rate Service'),
-                  ),
               ],
             ),
+
+            // Action buttons for technicians
+            if (_isTechnician) ...[
+              SizedBox(height: 16),
+              _buildTechnicianActions(context, ref, status, bookingId),
+            ] else if (status == 'completed') ...[
+              SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  // TODO: Navigate to rating screen
+                },
+                child: Text('Rate Service'),
+              ),
+            ],
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildTechnicianActions(
+    BuildContext context,
+    WidgetRef ref,
+    String status,
+    String bookingId,
+  ) {
+    if (status == 'accepted') {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () => _startBooking(context, ref, bookingId),
+          icon: Icon(Icons.play_arrow),
+          label: Text('Start Job'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.primary,
+          ),
+        ),
+      );
+    } else if (status == 'in_progress') {
+      return SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () => _completeBooking(context, ref, bookingId),
+          icon: Icon(Icons.check_circle),
+          label: Text('Complete Job'),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.success,
+          ),
+        ),
+      );
+    }
+    return SizedBox.shrink();
+  }
+
+  Future<void> _startBooking(
+    BuildContext context,
+    WidgetRef ref,
+    String bookingId,
+  ) async {
+    ref.read(bookingActionProvider.notifier).startBooking(bookingId);
+
+    // Refresh bookings after a short delay
+    await Future.delayed(Duration(milliseconds: 500));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Job started successfully'),
+          backgroundColor: AppTheme.success,
+        ),
+      );
+    }
+    ref.invalidate(bookingsProvider);
+  }
+
+  Future<void> _completeBooking(
+    BuildContext context,
+    WidgetRef ref,
+    String bookingId,
+  ) async {
+    ref.read(bookingActionProvider.notifier).completeBooking(bookingId);
+
+    // Refresh bookings after a short delay
+    await Future.delayed(Duration(milliseconds: 500));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Job completed successfully'),
+          backgroundColor: AppTheme.success,
+        ),
+      );
+    }
+    ref.invalidate(bookingsProvider);
   }
 
   Color _getStatusColor(String status) {

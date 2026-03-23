@@ -96,4 +96,62 @@ class BookingRepository {
   Future<List<Map<String, dynamic>>> getCompletedBookings() async {
     return getBookings(status: 'completed');
   }
+
+  Future<List<Map<String, dynamic>>> getAvailableBookings() async {
+    try {
+      final response = await _apiClient.getAvailableBookings();
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data as List<dynamic>;
+        return data.map((item) => item as Map<String, dynamic>).toList();
+      } else {
+        throw Exception('Failed to fetch available bookings');
+      }
+    } catch (e) {
+      throw Exception('Error fetching available bookings: ${e.toString()}');
+    }
+  }
+
+  Future<Map<String, dynamic>> acceptBooking(String bookingId) async {
+    try {
+      final response = await _apiClient.acceptBooking(bookingId);
+
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw Exception(response.data?['detail'] ?? 'Failed to accept booking');
+      }
+    } catch (e) {
+      throw Exception('Error accepting booking: ${e.toString()}');
+    }
+  }
+
+  Future<Map<String, dynamic>> startBooking(String bookingId) async {
+    try {
+      final response = await _apiClient.startBooking(bookingId);
+
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw Exception(response.data?['detail'] ?? 'Failed to start booking');
+      }
+    } catch (e) {
+      throw Exception('Error starting booking: ${e.toString()}');
+    }
+  }
+
+  Future<Map<String, dynamic>> completeBooking(String bookingId) async {
+    try {
+      final response = await _apiClient.completeBooking(bookingId);
+
+      if (response.statusCode == 200) {
+        return response.data as Map<String, dynamic>;
+      } else {
+        throw Exception(
+            response.data?['detail'] ?? 'Failed to complete booking');
+      }
+    } catch (e) {
+      throw Exception('Error completing booking: ${e.toString()}');
+    }
+  }
 }

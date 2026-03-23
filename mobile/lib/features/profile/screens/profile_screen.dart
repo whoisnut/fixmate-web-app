@@ -1,32 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../models/user.dart';
+import '../providers/profile_provider.dart';
+import 'edit_profile_screen.dart';
+import '../../settings/screens/settings_screen.dart';
+import '../../payment/screens/payment_methods_screen.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
-  User? currentUser;
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  bool _isTechnician = false;
 
   @override
   void initState() {
     super.initState();
-    _loadUserData();
+    _checkUserRole();
   }
 
-  Future<void> _loadUserData() async {
+  Future<void> _checkUserRole() async {
     final prefs = await SharedPreferences.getInstance();
     final userJson = prefs.getString(AppConstants.userKey);
     if (userJson != null) {
+      final userMap = jsonDecode(userJson) as Map<String, dynamic>;
       setState(() {
-        currentUser = User.fromJson(jsonDecode(userJson));
+        _isTechnician = userMap['role'] == 'technician';
       });
     }
   }
@@ -65,103 +70,230 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final profileAsyncValue = ref.watch(profileProvider);
+    final technicianStatsAsyncValue = _isTechnician
+        ? ref.watch(technicianStatsProvider)
+        : AsyncValue.data(<String, dynamic>{});
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Profile'),
       ),
-      body: currentUser == null
-          ? Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  // Profile Header
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: AppTheme.primary.withOpacity(0.1),
-                    child: Text(
-                      currentUser!.name[0].toUpperCase(),
-                      style: TextStyle(
-                        fontSize: 40,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    currentUser!.name,
-                    style: TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    currentUser!.email,
-                    style: TextStyle(
-                      color: AppTheme.textSecondary,
-                    ),
-                  ),
-                  if (currentUser!.phone != null) ...[
-                    SizedBox(height: 4),
-                    Text(
-                      currentUser!.phone!,
-                      style: TextStyle(
-                        color: AppTheme.textSecondary,
-                      ),
-                    ),
-                  ],
-                  SizedBox(height: 32),
-
-                  // Menu Items
-                  _buildMenuItem(
-                    icon: Icons.history,
-                    title: 'Booking History',
-                    onTap: () {
-                      Navigator.pushNamed(context, AppRoutes.bookingHistory);
-                    },
-                  ),
-                  _buildMenuItem(
-                    icon: Icons.favorite_border,
-                    title: 'Favorites',
-                    onTap: () {},
-                  ),
-                  _buildMenuItem(
-                    icon: Icons.payment,
-                    title: 'Payment Methods',
-                    onTap: () {},
-                  ),
-                  _buildMenuItem(
-                    icon: Icons.notifications_outlined,
-                    title: 'Notifications',
-                    onTap: () {},
-                  ),
-                  _buildMenuItem(
-                    icon: Icons.help_outline,
-                    title: 'Help & Support',
-                    onTap: () {},
-                  ),
-                  _buildMenuItem(
-                    icon: Icons.settings_outlined,
-                    title: 'Settings',
-                    onTap: () {},
-                  ),
-                  SizedBox(height: 16),
-                  _buildMenuItem(
-                    icon: Icons.logout,
-                    title: 'Logout',
-                    onTap: _logout,
-                    isDestructive: true,
-                  ),
-                  SizedBox(height: 32),
-                  Text(
-                    'Version 1.0.0',
-                    style: TextStyle(color: Colors.grey),
-                  ),
-                ],
+      body: profileAsyncValue.when(
+        loading: () => Center(child: CircularProgressIndicator()),
+        error: (error, stack) => Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.error_outline, size: 48, color: AppTheme.error),
+              SizedBox(height: 16),
+              Text('Failed to load profile'),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => ref.refresh(profileProvider),
+                child: Text('Retry'),
               ),
-            ),
+            ],
+          ),
+        ),
+        data: (profile) => SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              // Profile Header
+              CircleAvatar(
+                radius: 50,
+                backgroundColor: AppTheme.primary.withOpacity(0.1),
+                child: Text(
+                  (profile['name'] as String? ?? 'U')[0].toUpperCase(),
+                  style: TextStyle(
+                    fontSize: 40,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primary,
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                profile['name'] as String? ?? 'User',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Text(
+                _isTechnician ? 'Technician' : 'Customer',
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => EditProfileScreen(
+                        profile: profile,
+                      ),
+                    ),
+                  );
+                  if (result == true) {
+                    // Refresh profile data
+                    ref.invalidate(profileProvider);
+                  }
+                },
+                icon: Icon(Icons.edit),
+                label: Text('Edit Profile'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.primary,
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                profile['email'] as String? ?? '',
+                style: TextStyle(
+                  color: AppTheme.textSecondary,
+                ),
+              ),
+              if (profile['phone'] != null) ...[
+                SizedBox(height: 4),
+                Text(
+                  profile['phone'] as String,
+                  style: TextStyle(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
+              ],
+              SizedBox(height: 32),
+
+              // Technician Stats
+              if (_isTechnician)
+                technicianStatsAsyncValue.when(
+                  loading: () => Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => SizedBox.shrink(),
+                  data: (stats) => Column(
+                    children: [
+                      Card(
+                        color: AppTheme.primary.withOpacity(0.1),
+                        margin: EdgeInsets.only(bottom: 24),
+                        child: Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              _buildStatCard(
+                                label: 'Jobs Completed',
+                                value: (stats['total_jobs'] ?? 0).toString(),
+                              ),
+                              _buildStatCard(
+                                label: 'Rating',
+                                value:
+                                    (stats['rating'] ?? 0.0).toStringAsFixed(1),
+                              ),
+                              _buildStatCard(
+                                label: 'Verified',
+                                value:
+                                    stats['is_verified'] == true ? 'Yes' : 'No',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Menu Items
+              _buildMenuItem(
+                icon: Icons.history,
+                title: 'Booking History',
+                onTap: () {
+                  Navigator.pushNamed(context, AppRoutes.bookingHistory);
+                },
+              ),
+              if (!_isTechnician)
+                _buildMenuItem(
+                  icon: Icons.favorite_border,
+                  title: 'Favorites',
+                  onTap: () {},
+                ),
+              if (!_isTechnician)
+                _buildMenuItem(
+                  icon: Icons.payment,
+                  title: 'Payment Methods',
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const PaymentMethodsScreen()),
+                    );
+                  },
+                ),
+              _buildMenuItem(
+                icon: Icons.notifications_outlined,
+                title: 'Notifications',
+                onTap: () {},
+              ),
+              _buildMenuItem(
+                icon: Icons.help_outline,
+                title: 'Help & Support',
+                onTap: () {},
+              ),
+              _buildMenuItem(
+                icon: Icons.settings_outlined,
+                title: 'Settings',
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => SettingsScreen()),
+                  );
+                },
+              ),
+              SizedBox(height: 16),
+              _buildMenuItem(
+                icon: Icons.logout,
+                title: 'Logout',
+                onTap: _logout,
+                isDestructive: true,
+              ),
+              SizedBox(height: 32),
+              Text(
+                'Version 1.0.0',
+                style: TextStyle(color: Colors.grey),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard({
+    required String label,
+    required String value,
+  }) {
+    return Column(
+      children: [
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primary,
+          ),
+        ),
+        SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: AppTheme.textSecondary,
+          ),
+        ),
+      ],
     );
   }
 
