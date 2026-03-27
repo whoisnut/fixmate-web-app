@@ -30,7 +30,7 @@ class PaymentMethod {
       expiryMonth: json['expiry_month'].toString().padLeft(2, '0'),
       expiryYear: json['expiry_year'].toString(),
       brand: json['brand'],
-      isDefault: json['is_default'] ?? false,
+      isDefault: json['is_default'] == "1" || json['is_default'] == true,
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -44,7 +44,7 @@ class PaymentMethod {
       'expiry_month': expiryMonth,
       'expiry_year': expiryYear,
       'brand': brand,
-      'is_default': isDefault,
+      'is_default': isDefault ? "1" : "0",
       'created_at': createdAt.toIso8601String(),
     };
   }

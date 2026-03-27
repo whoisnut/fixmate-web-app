@@ -47,6 +47,21 @@ class Payment(Base):
     paid_at = Column(DateTime(timezone=True), nullable=True)
     booking = relationship("Booking", back_populates="payment")
 
+class PaymentMethod(Base):
+    __tablename__ = "payment_methods"
+    id = Column(String, primary_key=True, default=gen_uuid)
+    user_id = Column(String, ForeignKey("users.id"))
+    type = Column(String(20), default="credit_card")  # credit_card, debit_card
+    cardholder_name = Column(String(100))
+    last_four_digits = Column(String(4))
+    expiry_month = Column(String(2))
+    expiry_year = Column(String(4))
+    brand = Column(String(20))  # visa, mastercard, amex
+    is_default = Column(String(1), default="0")  # 1 for true, 0 for false
+    stripe_payment_method_id = Column(String, nullable=True)  # Stripe PM ID
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user = relationship("User", back_populates="payment_methods")
+
 class Message(Base):
     __tablename__ = "messages"
     id = Column(String, primary_key=True, default=gen_uuid)
