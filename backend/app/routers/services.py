@@ -6,14 +6,26 @@ from app.schemas.service import CategoryResponse, ServiceResponse
 from typing import List
 
 router = APIRouter(prefix="/api", tags=["Services"])
+ALLOWED_CATEGORY_NAMES = ("Car", "Motorbike")
 
 @router.get("/categories", response_model=List[CategoryResponse])
 def get_categories(db: Session = Depends(get_db)):
-    return db.query(Category).filter(Category.is_active == True).all()
+    return (
+        db.query(Category)
+        .filter(Category.is_active == True)
+        .filter(Category.name.in_(ALLOWED_CATEGORY_NAMES))
+        .all()
+    )
 
 @router.get("/services", response_model=List[ServiceResponse])
 def get_services(category_id: str = None, db: Session = Depends(get_db)):
-    query = db.query(Service).filter(Service.is_active == True)
+    query = (
+        db.query(Service)
+        .join(Category, Service.category_id == Category.id)
+        .filter(Service.is_active == True)
+        .filter(Category.is_active == True)
+        .filter(Category.name.in_(ALLOWED_CATEGORY_NAMES))
+    )
     if category_id:
         query = query.filter(Service.category_id == category_id)
     return query.all()
