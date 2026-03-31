@@ -17,6 +17,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   User? currentUser;
   List<Category> categories = [];
+  List<Map<String, dynamic>> recentBookings = [];
   bool isLoading = true;
 
   @override
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     _loadUserData();
     _loadCategories();
+    _loadRecentBookings();
   }
 
   Future<void> _loadUserData() async {
@@ -50,6 +52,33 @@ class _HomeScreenState extends State<HomeScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to load categories')),
       );
+    }
+  }
+
+  Future<void> _loadRecentBookings() async {
+    try {
+      final response = await ApiClient().getBookings();
+      final data = (response.data as List).cast<Map<String, dynamic>>();
+
+      data.sort((a, b) {
+        final aDate = DateTime.tryParse((a['created_at'] ?? '').toString()) ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = DateTime.tryParse((b['created_at'] ?? '').toString()) ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
+
+      if (mounted) {
+        setState(() {
+          recentBookings = data.take(3).toList();
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          recentBookings = [];
+        });
+      }
     }
   }
 
@@ -86,7 +115,12 @@ class _HomeScreenState extends State<HomeScreen> {
       body: isLoading
           ? Center(child: CircularProgressIndicator())
           : RefreshIndicator(
-              onRefresh: _loadCategories,
+              onRefresh: () async {
+                await Future.wait([
+                  _loadCategories(),
+                  _loadRecentBookings(),
+                ]);
+              },
               child: SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
                 padding: EdgeInsets.all(16),
@@ -95,7 +129,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     // Search Bar
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(12),
@@ -126,8 +161,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       child: Row(
                         children: [
-                          Icon(Icons.warning_amber_rounded, 
-                               color: Colors.white, size: 40),
+                          Icon(Icons.warning_amber_rounded,
+                              color: Colors.white, size: 40),
                           SizedBox(width: 16),
                           Expanded(
                             child: Column(
@@ -149,8 +184,8 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                           ),
-                          Icon(Icons.arrow_forward_ios, 
-                               color: Colors.white, size: 20),
+                          Icon(Icons.arrow_forward_ios,
+                              color: Colors.white, size: 20),
                         ],
                       ),
                     ),
@@ -165,15 +200,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                     SizedBox(height: 16),
-                    
+
                     if (categories.isEmpty)
                       Center(
                         child: Padding(
                           padding: EdgeInsets.all(32),
                           child: Column(
                             children: [
-                              Icon(Icons.category_outlined, 
-                                   size: 64, color: Colors.grey),
+                              Icon(Icons.category_outlined,
+                                  size: 64, color: Colors.grey),
                               SizedBox(height: 16),
                               Text(
                                 'No categories available',
@@ -214,28 +249,36 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                         TextButton(
                           onPressed: () {
-                            Navigator.pushNamed(context, AppRoutes.bookingHistory);
+                            Navigator.pushNamed(
+                                context, AppRoutes.bookingHistory);
                           },
                           child: Text('View All'),
                         ),
                       ],
                     ),
                     SizedBox(height: 8),
-                    Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(32),
-                        child: Column(
-                          children: [
-                            Icon(Icons.history, size: 48, color: Colors.grey),
-                            SizedBox(height: 8),
-                            Text(
-                              'No recent bookings',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ],
+                    if (recentBookings.isEmpty)
+                      Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(32),
+                          child: Column(
+                            children: [
+                              Icon(Icons.history, size: 48, color: Colors.grey),
+                              SizedBox(height: 8),
+                              Text(
+                                'No recent bookings',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
                         ),
+                      )
+                    else
+                      Column(
+                        children: recentBookings
+                            .map((booking) => _buildRecentBookingCard(booking))
+                            .toList(),
                       ),
-                    ),
                   ],
                 ),
               ),
@@ -245,7 +288,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildCategoryCard(Category category) {
     final color = _parseColor(category.colorHex);
-    
+
     return GestureDetector(
       onTap: () {
         Navigator.pushNamed(
@@ -317,6 +360,85 @@ class _HomeScreenState extends State<HomeScreen> {
         return Icons.directions_car;
       default:
         return Icons.build;
+    }
+  }
+
+  Widget _buildRecentBookingCard(Map<String, dynamic> booking) {
+    final status = (booking['status'] ?? 'pending').toString();
+    final scheduledAtRaw = (booking['scheduled_at'] ?? '').toString();
+    final scheduledAt = DateTime.tryParse(scheduledAtRaw);
+
+    return Container(
+      width: double.infinity,
+      margin: EdgeInsets.only(bottom: 10),
+      padding: EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 10,
+            height: 10,
+            decoration: BoxDecoration(
+              color: _getStatusColor(status),
+              shape: BoxShape.circle,
+            ),
+          ),
+          SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Booking #${(booking['id'] ?? '').toString().substring(0, ((booking['id'] ?? '').toString().length >= 8) ? 8 : (booking['id'] ?? '').toString().length)}',
+                  style: TextStyle(fontWeight: FontWeight.w600),
+                ),
+                SizedBox(height: 2),
+                Text(
+                  scheduledAt != null
+                      ? '${scheduledAt.day}/${scheduledAt.month}/${scheduledAt.year} ${scheduledAt.hour.toString().padLeft(2, '0')}:${scheduledAt.minute.toString().padLeft(2, '0')}'
+                      : 'Scheduled time unavailable',
+                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            decoration: BoxDecoration(
+              color: _getStatusColor(status).withOpacity(0.12),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              status.replaceAll('_', ' '),
+              style: TextStyle(
+                color: _getStatusColor(status),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'completed':
+        return Colors.green;
+      case 'in_progress':
+        return Colors.blue;
+      case 'accepted':
+        return Colors.indigo;
+      case 'cancelled':
+        return Colors.red;
+      case 'pending':
+      default:
+        return Colors.orange;
     }
   }
 }
