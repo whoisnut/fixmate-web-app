@@ -112,6 +112,10 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
   ) {
     final status = booking['status'] as String? ?? 'pending';
     final bookingId = booking['id'] as String? ?? '';
+    final service = booking['service'] as Map<String, dynamic>? ?? {};
+    final serviceName = service['name'] as String? ?? 'Unknown Service';
+    final totalPrice = booking['total_price'] as num? ?? 0;
+    final priceFormatted = totalPrice.toStringAsFixed(2);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
@@ -120,20 +124,37 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Booking ID and Status
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Booking #${(bookingId).substring(0, 8)}',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Booking #${(bookingId).substring(0, 8)}',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        serviceName,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppTheme.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 _buildStatusChip(status),
               ],
             ),
             const SizedBox(height: 12),
+            // Location
             Row(
               children: [
                 const Icon(Icons.location_on, size: 16, color: Colors.grey),
@@ -147,22 +168,38 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
               ],
             ),
             const SizedBox(height: 8),
+            // Scheduled Date
+            if (booking['scheduled_at'] != null) ...[
+              Row(
+                children: [
+                  const Icon(Icons.schedule, size: 16, color: Colors.grey),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Scheduled: ${booking['scheduled_at'] ?? 'N/A'}',
+                    style: const TextStyle(color: AppTheme.textSecondary),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+            ],
+            // Created Date
             Row(
               children: [
                 const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
                 const SizedBox(width: 8),
                 Text(
-                  booking['created_at'] ?? 'N/A',
+                  'Created: ${booking['created_at'] ?? 'N/A'}',
                   style: const TextStyle(color: AppTheme.textSecondary),
                 ),
               ],
             ),
             const SizedBox(height: 12),
+            // Price
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '\$${(booking['total_price'] ?? 0).toString()}',
+                  '\$$priceFormatted',
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
