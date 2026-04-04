@@ -5,6 +5,7 @@ from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.user import User, Technician
 from app.models.booking import Booking
+from app.models.service import Service
 from app.schemas.booking import BookingCreate, BookingResponse
 from typing import List, Optional
 
@@ -16,6 +17,14 @@ def create_booking(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    # Fetch the service to get the price
+    service = db.query(Service).filter(Service.id == booking_data.service_id).first()
+    if not service:
+        raise HTTPException(status_code=404, detail="Service not found")
+    
+    # Use min_price as the total_price for the booking
+    total_price = service.min_price
+    
     booking = Booking(
         customer_id=current_user.id,
         service_id=booking_data.service_id,
@@ -24,7 +33,8 @@ def create_booking(
         lng=booking_data.lng,
         scheduled_at=booking_data.scheduled_at,
         notes=booking_data.notes,
-        status="pending"
+        status="pending",
+        total_price=total_price
     )
     db.add(booking)
     db.commit()
