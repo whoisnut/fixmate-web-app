@@ -10,6 +10,7 @@ import '../../settings/screens/settings_screen.dart';
 import '../../payment/screens/payment_methods_screen.dart';
 import '../../notifications/screens/notifications_screen.dart';
 import '../../help_support/screens/help_support_screen.dart';
+import '../../favorites/screens/favorites_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -221,7 +222,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 _buildMenuItem(
                   icon: Icons.favorite_border,
                   title: 'Favorites',
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (_) => const FavoritesScreen()),
+                    );
+                  },
                 ),
               if (!_isTechnician)
                 _buildMenuItem(
