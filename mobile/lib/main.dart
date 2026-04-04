@@ -57,7 +57,7 @@ class FixMateApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const ProfileScreen());
           default:
             return MaterialPageRoute(
-              builder: (_) => Scaffold(
+              builder: (_) => const Scaffold(
                 body: Center(child: flutter_material.Text('Page not found')),
               ),
             );

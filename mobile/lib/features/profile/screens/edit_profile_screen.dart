@@ -49,7 +49,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('All fields are required')));
+      ).showSnackBar(const SnackBar(content: Text('All fields are required')));
       return;
     }
 
@@ -73,7 +73,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     if (state.updatedProfile != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Profile updated successfully'),
           backgroundColor: AppTheme.success,
         ),
@@ -89,11 +89,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit Profile'),
+        title: const Text('Edit Profile'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -105,7 +105,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   _nameController.text.isNotEmpty
                       ? _nameController.text[0].toUpperCase()
                       : '?',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
@@ -113,8 +113,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 32),
-            Text(
+            const SizedBox(height: 32),
+            const Text(
               'Full Name',
               style: TextStyle(
                 fontSize: 14,
@@ -122,19 +122,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 color: AppTheme.textSecondary,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             TextField(
               controller: _nameController,
               decoration: InputDecoration(
                 hintText: 'Enter your name',
-                prefixIcon: Icon(Icons.person),
+                prefixIcon: const Icon(Icons.person),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-            SizedBox(height: 24),
-            Text(
+            const SizedBox(height: 24),
+            const Text(
               'Email Address',
               style: TextStyle(
                 fontSize: 14,
@@ -142,7 +142,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 color: AppTheme.textSecondary,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             TextField(
               enabled: false,
               controller: TextEditingController(
@@ -150,14 +150,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
               ),
               decoration: InputDecoration(
                 hintText: 'Email cannot be changed',
-                prefixIcon: Icon(Icons.email),
+                prefixIcon: const Icon(Icons.email),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-            SizedBox(height: 24),
-            Text(
+            const SizedBox(height: 24),
+            const Text(
               'Phone Number',
               style: TextStyle(
                 fontSize: 14,
@@ -165,19 +165,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 color: AppTheme.textSecondary,
               ),
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             TextField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 hintText: 'Enter your phone number',
-                prefixIcon: Icon(Icons.phone),
+                prefixIcon: const Icon(Icons.phone),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
             SizedBox(
               height: 48,
               child: ElevatedButton(
@@ -192,7 +192,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                   ),
                 ),
                 child: updateState.isLoading
-                    ? SizedBox(
+                    ? const SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
@@ -200,7 +200,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           strokeWidth: 2,
                         ),
                       )
-                    : Text(
+                    : const Text(
                         'Save Changes',
                         style: TextStyle(
                           fontSize: 16,

@@ -49,7 +49,7 @@ class PaymentMethod {
     };
   }
 
-  String get cardDisplay => '$brand •••• ${lastFourDigits}';
+  String get cardDisplay => '$brand •••• $lastFourDigits';
   String get expiryDisplay => '$expiryMonth/$expiryYear';
   bool get isExpired {
     final now = DateTime.now();

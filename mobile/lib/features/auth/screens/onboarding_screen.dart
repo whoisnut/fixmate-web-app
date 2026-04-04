@@ -60,7 +60,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     children: List.generate(
                       pages.length,
                       (index) => Container(
-                        margin: EdgeInsets.symmetric(horizontal: 4),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
                         width: _currentPage == index ? 24 : 8,
                         height: 8,
                         decoration: BoxDecoration(
@@ -134,7 +134,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           const SizedBox(height: 16),
           Text(
             page.description,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 16,
               color: AppTheme.textSecondary,
             ),
@@ -157,5 +157,3 @@ class OnboardingPage {
     required this.description,
   });
 }
-
- 

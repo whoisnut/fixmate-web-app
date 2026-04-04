@@ -99,7 +99,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -111,7 +111,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Text(
+                const Text(
                   'Create Account',
                   style: TextStyle(
                     fontSize: 32,
@@ -119,7 +119,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                Text(
+                const Text(
                   'Sign up to get started',
                   style: TextStyle(
                     fontSize: 16,
@@ -130,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 32),
                 TextFormField(
                   controller: _nameController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Full Name',
                     prefixIcon: Icon(Icons.person),
                   ),
@@ -144,7 +144,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _emailController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email),
                   ),
@@ -162,7 +162,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _phoneController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Phone Number',
                     prefixIcon: Icon(Icons.phone),
                   ),
@@ -179,7 +179,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword
                           ? Icons.visibility
@@ -205,7 +205,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _confirmPasswordController,
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
-                    prefixIcon: Icon(Icons.lock_outline),
+                    prefixIcon: const Icon(Icons.lock_outline),
                     suffixIcon: IconButton(
                       icon: Icon(_obscureConfirmPassword
                           ? Icons.visibility
@@ -228,20 +228,20 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ElevatedButton(
                   onPressed: _isLoading ? null : _register,
                   child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Sign Up'),
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Sign Up'),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Already have an account? "),
+                    const Text("Already have an account? "),
                     TextButton(
                       onPressed: () {
                         Navigator.pushReplacementNamed(
                             context, AppRoutes.login);
                       },
-                      child: Text('Sign In'),
+                      child: const Text('Sign In'),
                     ),
                   ],
                 ),

@@ -52,8 +52,8 @@ class _AddPaymentMethodScreenState
       } else if (typeName.contains('Error')) {
         // Extract error message if available
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Failed to add payment method'),
+          const SnackBar(
+            content: Text('Failed to add payment method'),
             backgroundColor: AppTheme.error,
           ),
         );
@@ -92,7 +92,7 @@ class _AddPaymentMethodScreenState
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(
+                    const Icon(
                       Icons.credit_card,
                       color: Colors.white,
                       size: 32,
@@ -363,14 +363,14 @@ class _AddPaymentMethodScreenState
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
                 ),
-                child: Row(
+                child: const Row(
                   children: [
                     Icon(
                       Icons.lock_outline,
                       size: 20,
                       color: AppTheme.primary,
                     ),
-                    const SizedBox(width: 12),
+                    SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         'Your card details are encrypted and secure',

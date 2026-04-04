@@ -34,7 +34,7 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.error_outline,
                   size: 48,
                   color: AppTheme.error,
@@ -180,7 +180,7 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(color: AppTheme.primary),
                         ),
-                        child: Text(
+                        child: const Text(
                           'Default',
                           style: TextStyle(
                             fontSize: 12,
@@ -192,8 +192,8 @@ class _PaymentMethodsScreenState extends ConsumerState<PaymentMethodsScreen> {
                   ],
                 ),
                 if (isExpired)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 12),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 12),
                     child: Text(
                       'This card has expired',
                       style: TextStyle(

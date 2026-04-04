@@ -40,10 +40,10 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Booking History'),
+        title: const Text('Booking History'),
       ),
       body: bookingsAsyncValue.when(
-        loading: () => Center(
+        loading: () => const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -57,25 +57,25 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 64, color: Colors.red),
-              SizedBox(height: 16),
-              Text(
+              const Icon(Icons.error_outline, size: 64, color: Colors.red),
+              const SizedBox(height: 16),
+              const Text(
                 'Failed to load bookings',
                 style: TextStyle(fontSize: 16, color: Colors.red),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () {
                   ref.invalidate(bookingsProvider);
                 },
-                icon: Icon(Icons.refresh),
-                label: Text('Retry'),
+                icon: const Icon(Icons.refresh),
+                label: const Text('Retry'),
               ),
             ],
           ),
         ),
         data: (bookings) => bookings.isEmpty
-            ? Center(
+            ? const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -94,7 +94,7 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
                   await ref.watch(bookingsProvider.future);
                 },
                 child: ListView.builder(
-                  padding: EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(16),
                   itemCount: bookings.length,
                   itemBuilder: (context, index) {
                     return _buildBookingCard(context, ref, bookings[index]);
@@ -114,9 +114,9 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
     final bookingId = booking['id'] as String? ?? '';
 
     return Card(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       child: Padding(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -125,7 +125,7 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
               children: [
                 Text(
                   'Booking #${(bookingId).substring(0, 8)}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
                   ),
@@ -133,37 +133,37 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
                 _buildStatusChip(status),
               ],
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               children: [
-                Icon(Icons.location_on, size: 16, color: Colors.grey),
-                SizedBox(width: 8),
+                const Icon(Icons.location_on, size: 16, color: Colors.grey),
+                const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     booking['address'] ?? 'Unknown location',
-                    style: TextStyle(color: AppTheme.textSecondary),
+                    style: const TextStyle(color: AppTheme.textSecondary),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 8),
+            const SizedBox(height: 8),
             Row(
               children: [
-                Icon(Icons.calendar_today, size: 16, color: Colors.grey),
-                SizedBox(width: 8),
+                const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
+                const SizedBox(width: 8),
                 Text(
                   booking['created_at'] ?? 'N/A',
-                  style: TextStyle(color: AppTheme.textSecondary),
+                  style: const TextStyle(color: AppTheme.textSecondary),
                 ),
               ],
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   '\$${(booking['total_price'] ?? 0).toString()}',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.success,
@@ -174,15 +174,15 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
 
             // Action buttons for technicians
             if (_isTechnician) ...[
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildTechnicianActions(context, ref, status, bookingId),
             ] else if (status == 'completed') ...[
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               TextButton(
                 onPressed: () {
                   // TODO: Navigate to rating screen
                 },
-                child: Text('Rate Service'),
+                child: const Text('Rate Service'),
               ),
             ],
           ],
@@ -202,8 +202,8 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
         width: double.infinity,
         child: ElevatedButton.icon(
           onPressed: () => _startBooking(context, ref, bookingId),
-          icon: Icon(Icons.play_arrow),
-          label: Text('Start Job'),
+          icon: const Icon(Icons.play_arrow),
+          label: const Text('Start Job'),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.primary,
           ),
@@ -214,15 +214,15 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
         width: double.infinity,
         child: ElevatedButton.icon(
           onPressed: () => _completeBooking(context, ref, bookingId),
-          icon: Icon(Icons.check_circle),
-          label: Text('Complete Job'),
+          icon: const Icon(Icons.check_circle),
+          label: const Text('Complete Job'),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.success,
           ),
         ),
       );
     }
-    return SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 
   Future<void> _startBooking(
@@ -233,10 +233,10 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
     ref.read(bookingActionProvider.notifier).startBooking(bookingId);
 
     // Refresh bookings after a short delay
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 500));
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Job started successfully'),
           backgroundColor: AppTheme.success,
         ),
@@ -253,10 +253,10 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
     ref.read(bookingActionProvider.notifier).completeBooking(bookingId);
 
     // Refresh bookings after a short delay
-    await Future.delayed(Duration(milliseconds: 500));
+    await Future.delayed(const Duration(milliseconds: 500));
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Job completed successfully'),
           backgroundColor: AppTheme.success,
         ),
@@ -285,7 +285,7 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
     final color = _getStatusColor(status);
 
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(12),

@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/network/api_client.dart';
 import '../../../models/user.dart';
 import '../../../models/service.dart';
+import '../../notifications/screens/notifications_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,7 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
     } catch (e) {
       setState(() => isLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to load categories')),
+        const SnackBar(content: Text('Failed to load categories')),
       );
     }
   }
@@ -91,9 +92,9 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Text(
               'Hello, ${currentUser?.name ?? 'User'}',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
-            Text(
+            const Text(
               'What service do you need?',
               style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
             ),
@@ -101,11 +102,16 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.notifications_outlined),
-            onPressed: () {},
+            icon: const Icon(Icons.notifications_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const NotificationsScreen()),
+              );
+            },
           ),
           IconButton(
-            icon: Icon(Icons.person_outline),
+            icon: const Icon(Icons.person_outline),
             onPressed: () {
               Navigator.pushNamed(context, AppRoutes.profile);
             },
@@ -113,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : RefreshIndicator(
               onRefresh: () async {
                 await Future.wait([
@@ -122,20 +128,20 @@ class _HomeScreenState extends State<HomeScreen> {
                 ]);
               },
               child: SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                padding: EdgeInsets.all(16),
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // Search Bar
                     Container(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
                         color: Colors.grey[100],
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
                           Icon(Icons.search, color: Colors.grey),
                           SizedBox(width: 12),
@@ -148,18 +154,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
 
                     // Urgent Services Banner
                     Container(
-                      padding: EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
+                        gradient: const LinearGradient(
                           colors: [AppTheme.primary, AppTheme.secondary],
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: Row(
+                      child: const Row(
                         children: [
                           Icon(Icons.warning_amber_rounded,
                               color: Colors.white, size: 40),
@@ -189,20 +195,20 @@ class _HomeScreenState extends State<HomeScreen> {
                         ],
                       ),
                     ),
-                    SizedBox(height: 32),
+                    const SizedBox(height: 32),
 
                     // Service Categories
-                    Text(
+                    const Text(
                       'Service Categories',
                       style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
 
                     if (categories.isEmpty)
-                      Center(
+                      const Center(
                         child: Padding(
                           padding: EdgeInsets.all(32),
                           child: Column(
@@ -221,8 +227,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     else
                       GridView.builder(
                         shrinkWrap: true,
-                        physics: NeverScrollableScrollPhysics(),
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        physics: const NeverScrollableScrollPhysics(),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
                           crossAxisCount: 2,
                           crossAxisSpacing: 16,
                           mainAxisSpacing: 16,
@@ -234,13 +241,13 @@ class _HomeScreenState extends State<HomeScreen> {
                         },
                       ),
 
-                    SizedBox(height: 32),
+                    const SizedBox(height: 32),
 
                     // Recent Bookings
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Recent Bookings',
                           style: TextStyle(
                             fontSize: 20,
@@ -252,13 +259,13 @@ class _HomeScreenState extends State<HomeScreen> {
                             Navigator.pushNamed(
                                 context, AppRoutes.bookingHistory);
                           },
-                          child: Text('View All'),
+                          child: const Text('View All'),
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     if (recentBookings.isEmpty)
-                      Center(
+                      const Center(
                         child: Padding(
                           padding: EdgeInsets.all(32),
                           child: Column(
@@ -305,7 +312,7 @@ class _HomeScreenState extends State<HomeScreen> {
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
               blurRadius: 10,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
@@ -313,7 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: color.withOpacity(0.1),
                 shape: BoxShape.circle,
@@ -324,10 +331,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: color,
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(
               category.name,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
               ),
@@ -370,8 +377,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.only(bottom: 10),
-      padding: EdgeInsets.all(14),
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
@@ -387,27 +394,28 @@ class _HomeScreenState extends State<HomeScreen> {
               shape: BoxShape.circle,
             ),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Booking #${(booking['id'] ?? '').toString().substring(0, ((booking['id'] ?? '').toString().length >= 8) ? 8 : (booking['id'] ?? '').toString().length)}',
-                  style: TextStyle(fontWeight: FontWeight.w600),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   scheduledAt != null
                       ? '${scheduledAt.day}/${scheduledAt.month}/${scheduledAt.year} ${scheduledAt.hour.toString().padLeft(2, '0')}:${scheduledAt.minute.toString().padLeft(2, '0')}'
                       : 'Scheduled time unavailable',
-                  style: TextStyle(fontSize: 12, color: AppTheme.textSecondary),
+                  style: const TextStyle(
+                      fontSize: 12, color: AppTheme.textSecondary),
                 ),
               ],
             ),
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
               color: _getStatusColor(status).withOpacity(0.12),
               borderRadius: BorderRadius.circular(20),

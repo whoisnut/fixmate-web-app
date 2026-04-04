@@ -8,6 +8,8 @@ import '../providers/profile_provider.dart';
 import 'edit_profile_screen.dart';
 import '../../settings/screens/settings_screen.dart';
 import '../../payment/screens/payment_methods_screen.dart';
+import '../../notifications/screens/notifications_screen.dart';
+import '../../help_support/screens/help_support_screen.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -40,16 +42,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Logout'),
-        content: Text('Are you sure you want to logout?'),
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Logout'),
+            child: const Text('Logout'),
           ),
         ],
       ),
@@ -73,31 +75,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final profileAsyncValue = ref.watch(profileProvider);
     final technicianStatsAsyncValue = _isTechnician
         ? ref.watch(technicianStatsProvider)
-        : AsyncValue.data(<String, dynamic>{});
+        : const AsyncValue.data(<String, dynamic>{});
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: const Text('Profile'),
       ),
       body: profileAsyncValue.when(
-        loading: () => Center(child: CircularProgressIndicator()),
+        loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stack) => Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, size: 48, color: AppTheme.error),
-              SizedBox(height: 16),
-              Text('Failed to load profile'),
-              SizedBox(height: 16),
+              const Icon(Icons.error_outline, size: 48, color: AppTheme.error),
+              const SizedBox(height: 16),
+              const Text('Failed to load profile'),
+              const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => ref.refresh(profileProvider),
-                child: Text('Retry'),
+                child: const Text('Retry'),
               ),
             ],
           ),
         ),
         data: (profile) => SingleChildScrollView(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             children: [
               // Profile Header
@@ -106,30 +108,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 backgroundColor: AppTheme.primary.withOpacity(0.1),
                 child: Text(
                   (profile['name'] as String? ?? 'U')[0].toUpperCase(),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 40,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.primary,
                   ),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 profile['name'] as String? ?? 'User',
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
                 _isTechnician ? 'Technician' : 'Customer',
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppTheme.textSecondary,
                   fontSize: 14,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               ElevatedButton.icon(
                 onPressed: () async {
                   final result = await Navigator.push(
@@ -145,42 +147,43 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ref.invalidate(profileProvider);
                   }
                 },
-                icon: Icon(Icons.edit),
-                label: Text('Edit Profile'),
+                icon: const Icon(Icons.edit),
+                label: const Text('Edit Profile'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.primary,
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Text(
                 profile['email'] as String? ?? '',
-                style: TextStyle(
+                style: const TextStyle(
                   color: AppTheme.textSecondary,
                 ),
               ),
               if (profile['phone'] != null) ...[
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   profile['phone'] as String,
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.textSecondary,
                   ),
                 ),
               ],
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
 
               // Technician Stats
               if (_isTechnician)
                 technicianStatsAsyncValue.when(
-                  loading: () => Center(child: CircularProgressIndicator()),
-                  error: (error, stack) => SizedBox.shrink(),
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (error, stack) => const SizedBox.shrink(),
                   data: (stats) => Column(
                     children: [
                       Card(
                         color: AppTheme.primary.withOpacity(0.1),
-                        margin: EdgeInsets.only(bottom: 24),
+                        margin: const EdgeInsets.only(bottom: 24),
                         child: Padding(
-                          padding: EdgeInsets.all(16),
+                          padding: const EdgeInsets.all(16),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
@@ -235,12 +238,24 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               _buildMenuItem(
                 icon: Icons.notifications_outlined,
                 title: 'Notifications',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const NotificationsScreen()),
+                  );
+                },
               ),
               _buildMenuItem(
                 icon: Icons.help_outline,
                 title: 'Help & Support',
-                onTap: () {},
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const HelpSupportScreen()),
+                  );
+                },
               ),
               _buildMenuItem(
                 icon: Icons.settings_outlined,
@@ -248,19 +263,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (_) => SettingsScreen()),
+                    MaterialPageRoute(builder: (_) => const SettingsScreen()),
                   );
                 },
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               _buildMenuItem(
                 icon: Icons.logout,
                 title: 'Logout',
                 onTap: _logout,
                 isDestructive: true,
               ),
-              SizedBox(height: 32),
-              Text(
+              const SizedBox(height: 32),
+              const Text(
                 'Version 1.0.0',
                 style: TextStyle(color: Colors.grey),
               ),
@@ -279,16 +294,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       children: [
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: AppTheme.primary,
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 12,
             color: AppTheme.textSecondary,
           ),
@@ -304,7 +319,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     bool isDestructive = false,
   }) {
     return Card(
-      margin: EdgeInsets.only(bottom: 8),
+      margin: const EdgeInsets.only(bottom: 8),
       child: ListTile(
         leading: Icon(
           icon,
@@ -316,7 +331,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             color: isDestructive ? AppTheme.error : null,
           ),
         ),
-        trailing: Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
         onTap: onTap,
       ),
     );

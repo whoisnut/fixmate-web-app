@@ -92,13 +92,13 @@ class _LoginScreenState extends State<LoginScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 40),
-                Icon(
+                const Icon(
                   Icons.build_circle,
                   size: 100,
                   color: AppTheme.primary,
                 ),
                 const SizedBox(height: 24),
-                Text(
+                const Text(
                   'Welcome Back!',
                   style: TextStyle(
                     fontSize: 32,
@@ -106,7 +106,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   textAlign: TextAlign.center,
                 ),
-                Text(
+                const Text(
                   'Sign in to continue',
                   style: TextStyle(
                     fontSize: 16,
@@ -117,7 +117,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 48),
                 TextFormField(
                   controller: _emailController,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Email',
                     prefixIcon: Icon(Icons.email),
                   ),
@@ -137,7 +137,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _passwordController,
                   decoration: InputDecoration(
                     labelText: 'Password',
-                    prefixIcon: Icon(Icons.lock),
+                    prefixIcon: const Icon(Icons.lock),
                     suffixIcon: IconButton(
                       icon: Icon(_obscurePassword
                           ? Icons.visibility
@@ -162,27 +162,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   alignment: Alignment.centerRight,
                   child: TextButton(
                     onPressed: () {},
-                    child: Text('Forgot Password?'),
+                    child: const Text('Forgot Password?'),
                   ),
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: _isLoading ? null : _login,
                   child: _isLoading
-                      ? CircularProgressIndicator(color: Colors.white)
-                      : Text('Sign In'),
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text('Sign In'),
                 ),
                 const SizedBox(height: 16),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text("Don't have an account? "),
+                    const Text("Don't have an account? "),
                     TextButton(
                       onPressed: () {
                         Navigator.pushReplacementNamed(
                             context, AppRoutes.register);
                       },
-                      child: Text('Sign Up'),
+                      child: const Text('Sign Up'),
                     ),
                   ],
                 ),

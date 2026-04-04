@@ -63,13 +63,13 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
+            const Icon(
               Icons.build_circle,
               size: 120,
               color: Colors.white,
             ),
             const SizedBox(height: 24),
-            Text(
+            const Text(
               'FixMate',
               style: TextStyle(
                 fontSize: 48,
@@ -86,7 +86,7 @@ class _SplashScreenState extends State<SplashScreen> {
               ),
             ),
             const SizedBox(height: 48),
-            CircularProgressIndicator(color: Colors.white),
+            const CircularProgressIndicator(color: Colors.white),
           ],
         ),
       ),

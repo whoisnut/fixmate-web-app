@@ -70,7 +70,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search services...',
-                prefixIcon: Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -79,7 +79,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
           ),
           Expanded(
             child: filteredServices.when(
-              loading: () => Center(
+              loading: () => const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -93,20 +93,21 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 64, color: Colors.red),
-                    SizedBox(height: 16),
-                    Text(
+                    const Icon(Icons.error_outline,
+                        size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    const Text(
                       'Failed to load services',
                       style: TextStyle(fontSize: 16, color: Colors.red),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     ElevatedButton.icon(
                       onPressed: () {
                         // Refresh the services data
                         ref.invalidate(servicesProvider(widget.category.id));
                       },
-                      icon: Icon(Icons.refresh),
-                      label: Text('Retry'),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Retry'),
                     ),
                   ],
                 ),
@@ -116,13 +117,14 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.search_off, size: 64, color: Colors.grey),
-                          SizedBox(height: 16),
+                          const Icon(Icons.search_off,
+                              size: 64, color: Colors.grey),
+                          const SizedBox(height: 16),
                           Text(
                             _searchQuery.isNotEmpty
                                 ? 'No services match your search'
                                 : 'No services available',
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontSize: 18,
                               color: Colors.grey,
                             ),
@@ -131,7 +133,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                       ),
                     )
                   : ListView.builder(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       itemCount: services.length,
                       itemBuilder: (context, index) {
                         return _buildServiceCard(services[index]);
@@ -146,7 +148,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
 
   Widget _buildServiceCard(Map<String, dynamic> service) {
     return Card(
-      margin: EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () {
           Navigator.pushNamed(
@@ -157,7 +159,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
         },
         borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: EdgeInsets.all(16),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -166,7 +168,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                   Expanded(
                     child: Text(
                       service['name'] ?? 'Unknown Service',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -174,12 +176,13 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                   ),
                   if ((service['urgency_level'] ?? 0) == 3)
                     Container(
-                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
                         color: AppTheme.error.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(4),
                       ),
-                      child: Text(
+                      child: const Text(
                         'URGENT',
                         style: TextStyle(
                           color: AppTheme.error,
@@ -192,10 +195,10 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
               ),
               if (service['description'] != null &&
                   (service['description'] as String).isNotEmpty) ...[
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   service['description'],
-                  style: TextStyle(
+                  style: const TextStyle(
                     color: AppTheme.textSecondary,
                     fontSize: 14,
                   ),
@@ -203,17 +206,17 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Row(
                     children: [
-                      Icon(Icons.attach_money,
+                      const Icon(Icons.attach_money,
                           size: 18, color: AppTheme.success),
                       Text(
                         '\$${(service['min_price'] ?? 0).toStringAsFixed(0)} - \$${(service['max_price'] ?? 0).toStringAsFixed(0)}',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.success,
@@ -230,10 +233,10 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 20, vertical: 8),
                     ),
-                    child: Text('Book Now'),
+                    child: const Text('Book Now'),
                   ),
                 ],
               ),

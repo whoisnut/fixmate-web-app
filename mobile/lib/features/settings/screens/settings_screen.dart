@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -9,89 +10,129 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
+  late SharedPreferences _prefs;
   bool _notificationsEnabled = true;
   bool _emailNotifications = true;
   bool _pushNotifications = true;
-  bool _darkMode = false;
+  final bool _darkMode = false;
   String _language = 'English';
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    _prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _notificationsEnabled = _prefs.getBool('notifications_enabled') ?? true;
+      _emailNotifications = _prefs.getBool('email_notifications') ?? true;
+      _pushNotifications = _prefs.getBool('push_notifications') ?? true;
+      _language = _prefs.getString('language') ?? 'English';
+      _isLoading = false;
+    });
+  }
+
+  Future<void> _saveNotificationPreferences() async {
+    await Future.wait([
+      _prefs.setBool('notifications_enabled', _notificationsEnabled),
+      _prefs.setBool('email_notifications', _emailNotifications),
+      _prefs.setBool('push_notifications', _pushNotifications),
+    ]);
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Settings'),
+          centerTitle: true,
+        ),
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Settings'),
+        title: const Text('Settings'),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Notifications Section
             _buildSectionHeader('Notifications'),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Card(
               child: Column(
                 children: [
                   SwitchListTile(
-                    title: Text('Enable Notifications'),
-                    subtitle: Text('Receive service updates'),
+                    title: const Text('Enable Notifications'),
+                    subtitle: const Text('Receive service updates'),
                     value: _notificationsEnabled,
                     onChanged: (value) {
                       setState(() => _notificationsEnabled = value);
+                      _saveNotificationPreferences();
                     },
                   ),
                   if (_notificationsEnabled) ...[
-                    Divider(),
+                    const Divider(),
                     SwitchListTile(
-                      title: Text('Email Notifications'),
-                      subtitle: Text('Send updates via email'),
+                      title: const Text('Email Notifications'),
+                      subtitle: const Text('Send updates via email'),
                       value: _emailNotifications,
                       onChanged: (value) {
                         setState(() => _emailNotifications = value);
+                        _saveNotificationPreferences();
                       },
                     ),
-                    Divider(),
+                    const Divider(),
                     SwitchListTile(
-                      title: Text('Push Notifications'),
-                      subtitle: Text('Send push notifications'),
+                      title: const Text('Push Notifications'),
+                      subtitle: const Text('Send push notifications'),
                       value: _pushNotifications,
                       onChanged: (value) {
                         setState(() => _pushNotifications = value);
+                        _saveNotificationPreferences();
                       },
                     ),
                   ],
                 ],
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
 
             // Preferences Section
             _buildSectionHeader('Preferences'),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Card(
               child: Column(
                 children: [
                   SwitchListTile(
-                    title: Text('Dark Mode'),
-                    subtitle: Text('Coming soon'),
+                    title: const Text('Dark Mode'),
+                    subtitle: const Text('Coming soon'),
                     value: _darkMode,
                     onChanged: null,
                   ),
-                  Divider(),
+                  const Divider(),
                   Padding(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Language',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         DropdownButton<String>(
                           value: _language,
                           isExpanded: true,
@@ -102,7 +143,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ))
                               .toList(),
                           onChanged: (value) {
-                            setState(() => _language = value!);
+                            if (value != null) {
+                              setState(() => _language = value);
+                              _prefs.setString('language', value);
+                            }
                           },
                         ),
                       ],
@@ -111,53 +155,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
 
             // Privacy & Security Section
             _buildSectionHeader('Privacy & Security'),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Card(
               child: Column(
                 children: [
                   ListTile(
-                    title: Text('Privacy Policy'),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                    title: const Text('Privacy Policy'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Privacy Policy - Coming soon')),
+                        const SnackBar(
+                            content: Text('Privacy Policy - Coming soon')),
                       );
                     },
                   ),
-                  Divider(),
+                  const Divider(),
                   ListTile(
-                    title: Text('Terms of Service'),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                    title: const Text('Terms of Service'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
+                        const SnackBar(
                             content: Text('Terms of Service - Coming soon')),
                       );
                     },
                   ),
-                  Divider(),
+                  const Divider(),
                   ListTile(
-                    title: Text('Data & Privacy'),
-                    trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                    title: const Text('Data & Privacy'),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                     onTap: () {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Data & Privacy - Coming soon')),
+                        const SnackBar(
+                            content: Text('Data & Privacy - Coming soon')),
                       );
                     },
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
 
             // App Info Section
             _buildSectionHeader('About'),
-            SizedBox(height: 12),
-            Card(
+            const SizedBox(height: 12),
+            const Card(
               child: Column(
                 children: [
                   Padding(
@@ -208,7 +254,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ],
               ),
             ),
-            SizedBox(height: 32),
+            const SizedBox(height: 32),
           ],
         ),
       ),
@@ -218,7 +264,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   Widget _buildSectionHeader(String title) {
     return Text(
       title,
-      style: TextStyle(
+      style: const TextStyle(
         fontSize: 18,
         fontWeight: FontWeight.bold,
         color: AppTheme.primary,
