@@ -101,6 +101,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             notes: _notesController.text.trim(),
           );
 
+      // Invalidate bookings provider to refresh the booking history
+      ref.invalidate(bookingsProvider);
+
       if (mounted) {
         showDialog(
           context: context,

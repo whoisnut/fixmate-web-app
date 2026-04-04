@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import and_
 from app.core.database import get_db
 from app.core.deps import get_current_user
@@ -58,6 +58,9 @@ def get_bookings(
     if query is None:
         return []
     
+    # Eagerly load the service relationship
+    query = query.options(joinedload(Booking.service))
+    
     if status:
         query = query.filter(Booking.status == status)
     
@@ -75,7 +78,7 @@ def get_available_bookings(
     available_bookings = db.query(Booking).filter(
         Booking.status == "pending",
         Booking.technician_id == None
-    ).all()
+    ).options(joinedload(Booking.service)).all()
     return available_bookings
 
 @router.get("/{booking_id}", response_model=BookingResponse)
@@ -84,7 +87,7 @@ def get_booking(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    booking = db.query(Booking).filter(Booking.id == booking_id).options(joinedload(Booking.service)).first()
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
