@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../providers/booking_provider.dart';
+import 'service_location_screen.dart';
 
 class BookingScreen extends ConsumerStatefulWidget {
   final Map<String, dynamic> service;
@@ -19,6 +20,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   final _notesController = TextEditingController();
   DateTime? selectedDate;
   TimeOfDay? selectedTime;
+  double? selectedLat;
+  double? selectedLng;
 
   Future<void> _selectDate() async {
     final date = await showDatePicker(
@@ -39,6 +42,27 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
     );
     if (time != null) {
       setState(() => selectedTime = time);
+    }
+  }
+
+  Future<void> _selectLocation() async {
+    final result = await Navigator.push<Map<String, dynamic>>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => ServiceLocationScreen(
+          initialAddress: _addressController.text,
+          initialLat: selectedLat,
+          initialLng: selectedLng,
+        ),
+      ),
+    );
+
+    if (result != null) {
+      setState(() {
+        _addressController.text = result['address'] ?? '';
+        selectedLat = result['lat'] as double?;
+        selectedLng = result['lng'] as double?;
+      });
     }
   }
 
@@ -71,8 +95,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       await ref.read(createBookingProvider.notifier).createBooking(
             serviceId: widget.service['id'],
             address: _addressController.text.trim(),
-            lat: 0.0, // TODO: Get from map
-            lng: 0.0, // TODO: Get from map
+            lat: selectedLat ?? 0.0,
+            lng: selectedLng ?? 0.0,
             scheduledAt: scheduledAt,
             notes: _notesController.text.trim(),
           );
@@ -184,16 +208,16 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       labelText: 'Enter your address',
                       prefixIcon: const Icon(Icons.location_on),
                       suffixIcon: IconButton(
-                        icon: const Icon(Icons.my_location),
-                        onPressed: () {
-                          // TODO: Get current location
-                        },
+                        icon: const Icon(Icons.map),
+                        onPressed: _selectLocation,
+                        tooltip: 'Open map to select location',
                       ),
                     ),
                     maxLines: 2,
+                    readOnly: true,
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter your address';
+                        return 'Please select your address using the map';
                       }
                       return null;
                     },
