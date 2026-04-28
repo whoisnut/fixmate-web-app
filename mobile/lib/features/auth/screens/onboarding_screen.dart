@@ -55,26 +55,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
+                  // Page Indicators
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(
                       pages.length,
                       (index) => Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: _currentPage == index ? 24 : 8,
+                        margin: const EdgeInsets.symmetric(horizontal: 5),
+                        width: _currentPage == index ? 32 : 8,
                         height: 8,
                         decoration: BoxDecoration(
                           color: _currentPage == index
                               ? AppTheme.primary
-                              : Colors.grey.shade300,
+                              : AppTheme.borderColor,
                           borderRadius: BorderRadius.circular(4),
                         ),
                       ),
                     ),
                   ),
                   const SizedBox(height: 32),
+
+                  // Action Buttons
                   SizedBox(
                     width: double.infinity,
+                    height: 48,
                     child: ElevatedButton(
                       onPressed: () {
                         if (_currentPage == pages.length - 1) {
@@ -91,17 +95,32 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         _currentPage == pages.length - 1
                             ? 'Get Started'
                             : 'Next',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),
-                  if (_currentPage < pages.length - 1)
-                    TextButton(
+                  const SizedBox(height: 12),
+
+                  // Skip Button
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
                       onPressed: () {
                         Navigator.pushReplacementNamed(
                             context, AppRoutes.login);
                       },
-                      child: const Text('Skip'),
+                      child: const Text(
+                        'Skip',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
                     ),
+                  ),
                 ],
               ),
             ),
@@ -112,35 +131,52 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildPage(OnboardingPage page) {
-    return Padding(
-      padding: const EdgeInsets.all(40),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            page.icon,
-            size: 150,
-            color: AppTheme.primary,
-          ),
-          const SizedBox(height: 48),
-          Text(
-            page.title,
-            style: const TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Icon Container
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(30),
+              ),
+              child: Icon(
+                page.icon,
+                size: 64,
+                color: AppTheme.primary,
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            page.description,
-            style: const TextStyle(
-              fontSize: 16,
-              color: AppTheme.textSecondary,
+            const SizedBox(height: 40),
+
+            // Title
+            Text(
+              page.title,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.textPrimary,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+            const SizedBox(height: 12),
+
+            // Description
+            Text(
+              page.description,
+              style: const TextStyle(
+                fontSize: 14,
+                color: AppTheme.textSecondary,
+                height: 1.6,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

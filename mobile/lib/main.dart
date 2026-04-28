@@ -8,6 +8,7 @@ import 'features/auth/screens/onboarding_screen.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/home/screens/home_screen.dart';
+import 'features/technician/screens/technician_home_screen.dart';
 import 'features/services/screens/services_screen.dart';
 import 'features/booking/screens/booking_screen.dart';
 import 'features/booking/screens/booking_history_screen.dart';
@@ -40,6 +41,9 @@ class FixMateApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const RegisterScreen());
           case AppRoutes.home:
             return MaterialPageRoute(builder: (_) => const HomeScreen());
+          case AppRoutes.technicianHome:
+            return MaterialPageRoute(
+                builder: (_) => const TechnicianHomeScreen());
           case AppRoutes.services:
             final category = settings.arguments as Category;
             return MaterialPageRoute(

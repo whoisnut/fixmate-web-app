@@ -28,13 +28,14 @@ class RefreshTokenRequest(BaseModel):
 class TechnicianInfo(BaseModel):
     id: str
     user_id: str
-    bio: str
-    specialties: List[str]
-    rating: float
-    total_jobs: int
-    is_verified: bool
-    is_available: bool
-    documents: List[dict]
+    bio: Optional[str] = None
+    specialties: Optional[List[str]] = None
+    rating: float = 0.0
+    total_jobs: int = 0
+    is_verified: bool = False
+    is_available: bool = False
+    documents: Optional[List[dict]] = None
+    verification_status: Optional[str] = None
     
     class Config:
         from_attributes = True

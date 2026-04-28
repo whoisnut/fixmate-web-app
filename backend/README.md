@@ -7,4 +7,7 @@ Production-style local run:
 cd /Users/user/fixmate/backend && source /Users/user/fixmate/backend/venv/bin/activate && uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 Demo account:
-demo.login@fixmate.dev / Pass1234
+demo.login@fixmate.dev / Pass1234 
+
+Customer: demo.login@fixmate.dev / Pass1234
+Technician: demo.tech@fixmate.dev / Pass1234

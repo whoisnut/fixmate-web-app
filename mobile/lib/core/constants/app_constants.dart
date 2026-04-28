@@ -49,6 +49,7 @@ class AppRoutes {
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
+  static const String technicianHome = '/technician-home';
   static const String services = '/services';
   static const String technicianMap = '/technician-map';
   static const String booking = '/booking';
