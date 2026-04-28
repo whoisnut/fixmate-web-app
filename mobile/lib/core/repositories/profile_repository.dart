@@ -1,4 +1,5 @@
 import '../network/api_client.dart';
+import '../network/api_exception.dart';
 
 class ProfileRepository {
   final ApiClient _apiClient = ApiClient();
@@ -10,10 +11,18 @@ class ProfileRepository {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to fetch profile');
+        throw ApiException(
+          message: 'Failed to fetch profile: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
       }
+    } on ApiException {
+      rethrow;
     } catch (e) {
-      throw Exception('Error fetching profile: ${e.toString()}');
+      throw ApiException(
+        message: 'Error fetching profile: $e',
+        originalError: e,
+      );
     }
   }
 
@@ -33,10 +42,18 @@ class ProfileRepository {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to update profile');
+        throw ApiException(
+          message: 'Failed to update profile: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
       }
+    } on ApiException {
+      rethrow;
     } catch (e) {
-      throw Exception('Error updating profile: ${e.toString()}');
+      throw ApiException(
+        message: 'Error updating profile: $e',
+        originalError: e,
+      );
     }
   }
 
@@ -48,10 +65,18 @@ class ProfileRepository {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to fetch technician stats');
+        throw ApiException(
+          message: 'Failed to fetch technician stats: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
       }
+    } on ApiException {
+      rethrow;
     } catch (e) {
-      throw Exception('Error fetching technician stats: ${e.toString()}');
+      throw ApiException(
+        message: 'Error fetching technician stats: $e',
+        originalError: e,
+      );
     }
   }
 
@@ -66,10 +91,18 @@ class ProfileRepository {
       if (response.statusCode == 200) {
         return response.data as Map<String, dynamic>;
       } else {
-        throw Exception('Failed to update availability');
+        throw ApiException(
+          message: 'Failed to update availability: ${response.statusCode}',
+          statusCode: response.statusCode,
+        );
       }
+    } on ApiException {
+      rethrow;
     } catch (e) {
-      throw Exception('Error updating availability: ${e.toString()}');
+      throw ApiException(
+        message: 'Error updating availability: $e',
+        originalError: e,
+      );
     }
   }
 

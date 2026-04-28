@@ -7,6 +7,10 @@ class PaymentCreate(BaseModel):
     amount: float
     method: str  # "card", "wallet", "cash", etc.
 
+class PaymentStatusUpdate(BaseModel):
+    status: str
+    transaction_id: Optional[str] = None
+
 class PaymentResponse(BaseModel):
     id: str
     booking_id: str

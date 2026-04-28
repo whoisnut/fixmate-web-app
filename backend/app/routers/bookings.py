@@ -6,10 +6,20 @@ from app.core.deps import get_current_user
 from app.models.user import User, Technician
 from app.models.booking import Booking
 from app.models.service import Service
-from app.schemas.booking import BookingCreate, BookingResponse
+from app.schemas.booking import BookingCreate, BookingResponse, BookingStatusUpdate
 from typing import List, Optional
+from datetime import datetime
 
 router = APIRouter(prefix="/api/bookings", tags=["Bookings"])
+
+# Booking status state machine transitions
+VALID_TRANSITIONS = {
+    "pending": ["accepted", "cancelled"],
+    "accepted": ["in_progress", "cancelled"],
+    "in_progress": ["completed", "cancelled"],
+    "completed": [],
+    "cancelled": []
+}
 
 @router.post("", response_model=BookingResponse)
 def create_booking(
@@ -22,8 +32,19 @@ def create_booking(
     if not service:
         raise HTTPException(status_code=404, detail="Service not found")
     
-    # Use min_price as the total_price for the booking
-    total_price = service.min_price
+    # Calculate total price: use provided price or calculate from min/max range
+    if booking_data.total_price:
+        total_price = booking_data.total_price
+    else:
+        # Default to min_price, but allow up to max_price
+        total_price = service.min_price
+    
+    # Validate price is within service bounds
+    if total_price < service.min_price or total_price > service.max_price:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Price must be between {service.min_price} and {service.max_price}"
+        )
     
     booking = Booking(
         customer_id=current_user.id,
@@ -104,20 +125,31 @@ def get_booking(
 @router.put("/{booking_id}", response_model=BookingResponse)
 def update_booking(
     booking_id: str,
-    status: Optional[str] = Query(None),
+    status_update: BookingStatusUpdate,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
+    """Update booking status with validation"""
     booking = db.query(Booking).filter(Booking.id == booking_id).first()
     if not booking:
         raise HTTPException(status_code=404, detail="Booking not found")
     
-    # Verify permissions
+    # Verify permissions - only customer can update their own booking
     if current_user.role == "customer" and booking.customer_id != current_user.id:
         raise HTTPException(status_code=403, detail="Access denied")
     
-    if status:
-        booking.status = status
+    if status_update.status:
+        # Validate status transition
+        current_status = booking.status
+        new_status = status_update.status
+        
+        if new_status not in VALID_TRANSITIONS.get(current_status, []):
+            raise HTTPException(
+                status_code=400,
+                detail=f"Cannot transition from '{current_status}' to '{new_status}'. Valid transitions: {VALID_TRANSITIONS.get(current_status, [])}"
+            )
+        
+        booking.status = new_status
     
     db.commit()
     db.refresh(booking)

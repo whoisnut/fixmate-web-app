@@ -51,6 +51,10 @@ def create_category(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Verify admin role
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can create categories")
+    
     existing = (
         db.query(Category)
         .filter(func.lower(Category.name) == category_data.name.strip().lower())
@@ -78,6 +82,10 @@ def update_category(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Verify admin role
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can update categories")
+    
     category = db.query(Category).filter(Category.id == category_id).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
@@ -100,6 +108,10 @@ def delete_category(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Verify admin role
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can delete categories")
+    
     category = db.query(Category).filter(Category.id == category_id).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
@@ -116,6 +128,10 @@ def create_service(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Verify admin role
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can create services")
+    
     category = db.query(Category).filter(Category.id == service_data.category_id).first()
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
@@ -134,6 +150,10 @@ def update_service(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Verify admin role
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can update services")
+    
     service = db.query(Service).filter(Service.id == service_id).first()
     if not service:
         raise HTTPException(status_code=404, detail="Service not found")
@@ -158,6 +178,10 @@ def delete_service(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
+    # Verify admin role
+    if current_user.role != "admin":
+        raise HTTPException(status_code=403, detail="Only admins can delete services")
+    
     service = db.query(Service).filter(Service.id == service_id).first()
     if not service:
         raise HTTPException(status_code=404, detail="Service not found")

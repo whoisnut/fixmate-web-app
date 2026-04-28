@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Float, DateTime, ForeignKey, Text, Integer
+from sqlalchemy import Column, String, Float, DateTime, ForeignKey, Text, Integer, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
@@ -57,7 +57,7 @@ class PaymentMethod(Base):
     expiry_month = Column(String(2))
     expiry_year = Column(String(4))
     brand = Column(String(20))  # visa, mastercard, amex
-    is_default = Column(String(1), default="0")  # 1 for true, 0 for false
+    is_default = Column(Boolean, default=False)  # Use Boolean instead of String
     stripe_payment_method_id = Column(String, nullable=True)  # Stripe PM ID
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("User", back_populates="payment_methods")

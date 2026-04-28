@@ -171,8 +171,9 @@ export default function Home() {
 
   async function updateBookingStatus(bookingId: string, status: string) {
     try {
-      await api.put(`/api/bookings/${bookingId}?status=${status}`);
+      await api.put(`/api/bookings/${bookingId}`, { status });
       await loadBookings();
+      setNotice(`Booking status updated to ${status}`);
     } catch (requestError) {
       console.error(requestError);
       setError("Unable to update booking status for this user role.");

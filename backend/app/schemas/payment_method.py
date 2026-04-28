@@ -1,4 +1,4 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
 
@@ -19,12 +19,6 @@ class PaymentMethodResponse(BaseModel):
     brand: str
     is_default: bool
     created_at: datetime
-
-    @validator("is_default", pre=True)
-    def parse_is_default(cls, value):
-        if isinstance(value, str):
-            return value == "1"
-        return bool(value)
 
     class Config:
         from_attributes = True

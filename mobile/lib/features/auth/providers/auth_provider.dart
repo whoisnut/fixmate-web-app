@@ -34,6 +34,32 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
   }
 
+  Future<void> registerTechnician({
+    required String name,
+    required String email,
+    required String phone,
+    required String password,
+    required String bio,
+    required List<String> specialties,
+    required List<String> documents,
+  }) async {
+    state = const AuthState.loading();
+    try {
+      final result = await _authRepository.registerTechnician(
+        name: name,
+        email: email,
+        phone: phone,
+        password: password,
+        bio: bio,
+        specialties: specialties,
+        documents: documents,
+      );
+      state = AuthState.authenticated(result);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
   Future<void> login({
     required String email,
     required String password,
@@ -47,6 +73,40 @@ class AuthNotifier extends StateNotifier<AuthState> {
       state = AuthState.authenticated(result);
     } catch (e) {
       state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<void> loginTechnician({
+    required String email,
+    required String password,
+  }) async {
+    state = const AuthState.loading();
+    try {
+      final result = await _authRepository.loginTechnician(
+        email: email,
+        password: password,
+      );
+      state = AuthState.authenticated(result);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+    }
+  }
+
+  Future<Map<String, dynamic>> getTechnicianVerificationStatus() async {
+    try {
+      return await _authRepository.getTechnicianVerificationStatus();
+    } catch (e) {
+      state = AuthState.error(e.toString());
+      rethrow;
+    }
+  }
+
+  Future<void> uploadTechnicianDocuments(List<String> documents) async {
+    try {
+      await _authRepository.uploadTechnicianDocuments(documents);
+    } catch (e) {
+      state = AuthState.error(e.toString());
+      rethrow;
     }
   }
 

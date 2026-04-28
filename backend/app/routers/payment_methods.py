@@ -83,7 +83,7 @@ def create_payment_method(
         expiry_month=payment_method_data.expiry_month.zfill(2),
         expiry_year=payment_method_data.expiry_year,
         brand=brand,
-        is_default="1" if existing_methods == 0 else "0",
+        is_default=existing_methods == 0,  # Use boolean value
         stripe_payment_method_id=None  # Would be set after Stripe tokenization
     )
 
@@ -114,9 +114,9 @@ def update_payment_method(
             db.query(PaymentMethod).filter(
                 PaymentMethod.user_id == current_user.id,
                 PaymentMethod.id != payment_method_id
-            ).update({"is_default": "0"})
+            ).update({"is_default": False})
 
-        payment_method.is_default = "1" if update_data.is_default else "0"
+        payment_method.is_default = update_data.is_default
 
     db.commit()
     db.refresh(payment_method)
@@ -141,9 +141,9 @@ def set_default_payment_method(
     db.query(PaymentMethod).filter(
         PaymentMethod.user_id == current_user.id,
         PaymentMethod.id != payment_method_id
-    ).update({"is_default": "0"})
+    ).update({"is_default": False})
 
-    payment_method.is_default = "1"
+    payment_method.is_default = True
     db.commit()
     db.refresh(payment_method)
 

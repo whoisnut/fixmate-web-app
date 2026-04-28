@@ -14,3 +14,4 @@ build/
 .vscode/
 firebase-admin.json
 google-services.json
+mobile/pubspec.lock

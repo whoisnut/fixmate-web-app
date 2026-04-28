@@ -20,6 +20,8 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     technician = relationship("Technician", back_populates="user", uselist=False)
     payment_methods = relationship("PaymentMethod", back_populates="user")
+    blacklisted_tokens = relationship("TokenBlacklist", back_populates="user")
+    payouts = relationship("Payout", back_populates="user")
 
 class Technician(Base):
     __tablename__ = "technicians"
@@ -33,6 +35,20 @@ class Technician(Base):
     is_available = Column(Boolean, default=False)
     current_lat = Column(Float, nullable=True)
     current_lng = Column(Float, nullable=True)
-    documents = Column(JSON, default=[])
-    user = relationship("User", back_populates="technician")
+    documents = Column(JSON, default=[])  # [{"name": "...", "url": "...", "type": "id/license/insurance"}]
+    verification_status = Column(String(20), default="pending")  # pending, verified, rejected
+    rejection_reason = Column(Text, nullable=True)
+    submitted_at = Column(DateTime(timezone=True), nullable=True)
+    verified_at = Column(DateTime(timezone=True), nullable=True)
+    verified_by = Column(String, nullable=True)  # Store admin user ID as string, not FK to avoid ambiguity
+    user = relationship("User", back_populates="technician", foreign_keys=[user_id])
     bookings = relationship("Booking", back_populates="technician")
+
+class TokenBlacklist(Base):
+    __tablename__ = "token_blacklist"
+    id = Column(String, primary_key=True, default=gen_uuid)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    token = Column(String, nullable=False, index=True)
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    user = relationship("User", back_populates="blacklisted_tokens")

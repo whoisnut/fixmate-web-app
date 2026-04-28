@@ -94,3 +94,69 @@ def update_technician_location(
     db.refresh(technician)
     
     return {"current_lat": technician.current_lat, "current_lng": technician.current_lng}
+
+@router.put("/technician/specialties")
+def update_technician_specialties(
+    specialties: list,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update technician specialties"""
+    if current_user.role != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can access this")
+    
+    technician = db.query(Technician).filter(Technician.user_id == current_user.id).first()
+    if not technician:
+        raise HTTPException(status_code=404, detail="Technician profile not found")
+    
+    technician.specialties = specialties
+    db.commit()
+    db.refresh(technician)
+    
+    return {"specialties": technician.specialties}
+
+@router.put("/technician/bio")
+def update_technician_bio(
+    bio: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update technician bio"""
+    if current_user.role != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can access this")
+    
+    technician = db.query(Technician).filter(Technician.user_id == current_user.id).first()
+    if not technician:
+        raise HTTPException(status_code=404, detail="Technician profile not found")
+    
+    if len(bio) > 500:
+        raise HTTPException(status_code=400, detail="Bio must be 500 characters or less")
+    
+    technician.bio = bio
+    db.commit()
+    db.refresh(technician)
+    
+    return {"bio": technician.bio}
+
+@router.get("/technician/{technician_id}")
+def get_technician_profile(
+    technician_id: str,
+    db: Session = Depends(get_db)
+):
+    """Get public technician profile"""
+    technician = db.query(Technician).filter(Technician.id == technician_id).first()
+    if not technician:
+        raise HTTPException(status_code=404, detail="Technician not found")
+    
+    # Only show public information
+    return {
+        "id": technician.id,
+        "name": technician.user.name,
+        "avatar_url": technician.user.avatar_url,
+        "bio": technician.bio,
+        "specialties": technician.specialties,
+        "rating": technician.rating,
+        "total_jobs": technician.total_jobs,
+        "is_verified": technician.is_verified,
+        "is_available": technician.is_available
+    }
