@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
-import '../../../models/message.dart';
 import '../providers/message_provider.dart';
 
 class ChatScreen extends ConsumerStatefulWidget {
@@ -27,7 +26,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(messageProvider.notifier).loadMessages(widget.bookingId);
       _scrollToBottom();
     });
   }
@@ -94,7 +94,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Icon(
-                          Icons.chat_outline,
+                          Icons.chat,
                           size: 64,
                           color: AppTheme.borderColor,
                         ),
@@ -152,7 +152,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  msg.message,
+                                  msg.content,
                                   style: TextStyle(
                                     fontSize: 14,
                                     color: isOwnMessage
@@ -162,7 +162,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
-                                  _formatTime(msg.createdAt),
+                                  _formatTime(msg.sentAt),
                                   style: TextStyle(
                                     fontSize: 11,
                                     color: isOwnMessage
