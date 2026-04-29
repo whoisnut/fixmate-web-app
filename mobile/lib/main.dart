@@ -9,10 +9,14 @@ import 'features/auth/screens/login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/technician/screens/technician_home_screen.dart';
+import 'features/technician/screens/technician_profile_setup_screen.dart';
 import 'features/services/screens/services_screen.dart';
 import 'features/booking/screens/booking_screen.dart';
 import 'features/booking/screens/booking_history_screen.dart';
+import 'features/booking/screens/job_tracking_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
+import 'features/review/screens/review_screen.dart';
+import 'features/chat/screens/chat_screen.dart';
 import 'models/service.dart';
 
 void main() {
@@ -59,6 +63,35 @@ class FixMateApp extends StatelessWidget {
                 builder: (_) => const BookingHistoryScreen());
           case AppRoutes.profile:
             return MaterialPageRoute(builder: (_) => const ProfileScreen());
+          case '/technician-profile-setup':
+            return MaterialPageRoute(
+                builder: (_) => const TechnicianProfileSetupScreen());
+          case '/job-tracking':
+            final args = settings.arguments as Map<String, String>;
+            return MaterialPageRoute(
+              builder: (_) => JobTrackingScreen(
+                bookingId: args['bookingId']!,
+                technicianName: args['technicianName']!,
+              ),
+            );
+          case '/review':
+            final args = settings.arguments as Map<String, String>;
+            return MaterialPageRoute(
+              builder: (_) => ReviewScreen(
+                bookingId: args['bookingId']!,
+                technicianName: args['technicianName']!,
+                technicianId: args['technicianId']!,
+              ),
+            );
+          case '/chat':
+            final args = settings.arguments as Map<String, String>;
+            return MaterialPageRoute(
+              builder: (_) => ChatScreen(
+                bookingId: args['bookingId']!,
+                otherUserName: args['otherUserName']!,
+                otherUserId: args['otherUserId']!,
+              ),
+            );
           default:
             return MaterialPageRoute(
               builder: (_) => const Scaffold(

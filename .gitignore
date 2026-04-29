@@ -12,6 +12,7 @@ build/
 *.g.dart
 .DS_Store
 .vscode/
+.gradle/
 firebase-admin.json
 google-services.json
 mobile/pubspec.lock
