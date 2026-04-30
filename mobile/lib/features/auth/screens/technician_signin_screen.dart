@@ -109,7 +109,7 @@ class _TechnicianSigninScreenState extends ConsumerState<TechnicianSigninScreen>
         title: const Text('FixMate Technician'),
         elevation: 0,
       ),
-      body: authState is _Loading
+      body: authState == const AuthState.loading()
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
@@ -396,17 +396,17 @@ class _TechnicianSigninScreenState extends ConsumerState<TechnicianSigninScreen>
               borderRadius: BorderRadius.circular(12),
               border: Border.all(color: Colors.blue[200]!),
             ),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                const Text(
                   'Verification Required',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: Colors.blue,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   'After registration, you\'ll need to upload your documents for verification. This typically takes 1-2 business days.',
                   style: TextStyle(
