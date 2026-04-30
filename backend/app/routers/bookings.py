@@ -9,6 +9,15 @@ from app.models.service import Service
 from app.schemas.booking import BookingCreate, BookingResponse, BookingStatusUpdate
 from typing import List, Optional
 from datetime import datetime
+import math
+
+def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    R = 6371.0
+    phi1, phi2 = math.radians(lat1), math.radians(lat2)
+    dphi = math.radians(lat2 - lat1)
+    dlambda = math.radians(lon2 - lon1)
+    a = math.sin(dphi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlambda / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(a))
 
 router = APIRouter(prefix="/api/bookings", tags=["Bookings"])
 
@@ -89,18 +98,31 @@ def get_bookings(
 
 @router.get("/available", response_model=List[BookingResponse])
 def get_available_bookings(
+    radius_km: float = Query(default=50.0, description="Search radius in km"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Get all available bookings for technicians to accept"""
+    """Get available bookings for technicians — filtered by distance if technician has location set"""
     if current_user.role != "technician":
         raise HTTPException(status_code=403, detail="Only technicians can access this")
-    
-    available_bookings = db.query(Booking).filter(
+
+    technician = db.query(Technician).filter(Technician.user_id == current_user.id).first()
+
+    bookings = db.query(Booking).filter(
         Booking.status == "pending",
         Booking.technician_id == None
     ).options(joinedload(Booking.service)).all()
-    return available_bookings
+
+    # Filter by distance only when the technician has a known location
+    if technician and technician.current_lat and technician.current_lng:
+        bookings = [
+            b for b in bookings
+            if b.lat and b.lng and _haversine_km(
+                technician.current_lat, technician.current_lng, b.lat, b.lng
+            ) <= radius_km
+        ]
+
+    return bookings
 
 @router.get("/{booking_id}", response_model=BookingResponse)
 def get_booking(
@@ -179,6 +201,23 @@ def accept_booking(
     db.commit()
     db.refresh(booking)
     return booking
+
+@router.post("/{booking_id}/reject")
+def reject_booking(
+    booking_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Technician declines a pending booking"""
+    if current_user.role != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can reject bookings")
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+    if booking.status != "pending":
+        raise HTTPException(status_code=400, detail="Only pending bookings can be rejected")
+    # Don't change status — just return success so the booking stays available to others
+    return {"message": "Booking rejected, it remains available for other technicians"}
 
 @router.post("/{booking_id}/start", response_model=BookingResponse)
 def start_booking(

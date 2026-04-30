@@ -3,295 +3,279 @@
 import { useEffect, useState } from "react";
 import api from "@/lib/api";
 
-type TechnicianRequest = {
+type Technician = {
   id: string;
   user_id: string;
   name: string;
   email: string;
-  phone: string;
+  phone?: string;
   specialties: string[];
   bio: string;
-  documents: Array<{
-    name: string;
-    url: string;
-    type: string;
-  }>;
-  verification_status: "pending" | "approved" | "rejected";
-  submitted_at: string;
+  documents: Array<{ name: string; url: string; type: string }>;
+  verification_status: "pending" | "verified" | "rejected";
+  submitted_at?: string;
   verified_at?: string;
   rejection_reason?: string;
   rating: number;
   total_jobs: number;
+  is_active: boolean;
+  is_verified: boolean;
+};
+
+const statusColors: Record<string, string> = {
+  verified: "bg-green-100 text-green-800",
+  pending: "bg-yellow-100 text-yellow-800",
+  rejected: "bg-red-100 text-red-800",
 };
 
 export default function TechnicianVerification() {
-  const [technicians, setTechnicians] = useState<TechnicianRequest[]>([]);
-  const [filteredTechnicians, setFilteredTechnicians] = useState<
-    TechnicianRequest[]
-  >([]);
+  const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filterStatus, setFilterStatus] = useState<string>("pending");
-  const [selectedTech, setSelectedTech] = useState<TechnicianRequest | null>(
-    null
-  );
+  const [selectedTech, setSelectedTech] = useState<Technician | null>(null);
   const [rejectionReason, setRejectionReason] = useState("");
+  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
-    fetchTechnicians();
+    void fetchTechnicians();
   }, []);
 
-  const fetchTechnicians = async () => {
+  async function fetchTechnicians() {
     try {
       setLoading(true);
-      // TODO: Replace with actual API endpoint
-      // const response = await api.get("/api/admin/technicians");
-      // setTechnicians(response.data);
-      setTechnicians([]);
-    } catch (error) {
-      console.error("Error fetching technicians:", error);
+      setError(null);
+      const res = await api.get<{ technicians: Technician[] }>("/api/admin/technicians");
+      setTechnicians(res.data.technicians ?? []);
+    } catch {
+      setError("Failed to load technicians. Make sure you are signed in as admin.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  useEffect(() => {
-    let filtered = technicians;
+  const filtered =
+    filterStatus === "all"
+      ? technicians
+      : technicians.filter((t) => t.verification_status === filterStatus);
 
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((tech) => tech.verification_status === filterStatus);
-    }
+  const countOf = (status: string) =>
+    status === "all"
+      ? technicians.length
+      : technicians.filter((t) => t.verification_status === status).length;
 
-    setFilteredTechnicians(filtered);
-  }, [technicians, filterStatus]);
-
-  const handleApproveTechnician = async (techId: string) => {
+  async function handleApprove(techId: string) {
+    setActionLoading(true);
     try {
-      // TODO: Call approve API endpoint
-      // await api.post(`/api/admin/technicians/${techId}/verify`);
-      fetchTechnicians();
+      await api.post(`/api/admin/technicians/${techId}/verify`);
+      await fetchTechnicians();
       setSelectedTech(null);
-    } catch (error) {
-      console.error("Error approving technician:", error);
+    } catch {
+      setError("Failed to approve technician.");
+    } finally {
+      setActionLoading(false);
     }
-  };
+  }
 
-  const handleRejectTechnician = async (techId: string) => {
+  async function handleReject(techId: string) {
     if (!rejectionReason.trim()) {
-      alert("Please provide a rejection reason");
+      alert("Please provide a rejection reason.");
       return;
     }
-
+    setActionLoading(true);
     try {
-      // TODO: Call reject API endpoint
-      // await api.post(`/api/admin/technicians/${techId}/reject`, {
-      //   reason: rejectionReason,
-      // });
-      fetchTechnicians();
-      setSelectedTech(null);
+      await api.post(`/api/admin/technicians/${techId}/reject`, { reason: rejectionReason });
       setRejectionReason("");
-    } catch (error) {
-      console.error("Error rejecting technician:", error);
+      await fetchTechnicians();
+      setSelectedTech(null);
+    } catch {
+      setError("Failed to reject technician.");
+    } finally {
+      setActionLoading(false);
     }
-  };
+  }
+
+  async function handleSuspend(techId: string) {
+    setActionLoading(true);
+    try {
+      await api.post(`/api/admin/technicians/${techId}/suspend`);
+      await fetchTechnicians();
+      setSelectedTech(null);
+    } catch {
+      setError("Failed to suspend technician.");
+    } finally {
+      setActionLoading(false);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">
-            Technician Verification
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Review and approve technician registration requests
-          </p>
+    <div className="min-h-screen bg-slate-50 p-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Technician Verification</h1>
+            <p className="mt-1 text-slate-500">Review and approve technician registrations</p>
+          </div>
+          <button
+            onClick={() => void fetchTechnicians()}
+            className="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium hover:bg-slate-100"
+          >
+            Refresh
+          </button>
         </div>
 
-        {/* Filter Tabs */}
-        <div className="flex gap-4 mb-6">
-          {["pending", "approved", "rejected", "all"].map((status) => (
+        {error && (
+          <p className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </p>
+        )}
+
+        {/* Filter tabs */}
+        <div className="mb-6 flex flex-wrap gap-2">
+          {(["pending", "verified", "rejected", "all"] as const).map((s) => (
             <button
-              key={status}
-              onClick={() => setFilterStatus(status)}
-              className={`px-6 py-2 rounded-lg font-medium transition ${
-                filterStatus === status
-                  ? "bg-blue-600 text-white"
-                  : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
+              key={s}
+              onClick={() => setFilterStatus(s)}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition ${
+                filterStatus === s
+                  ? "bg-slate-900 text-white"
+                  : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
               }`}
             >
-              {status.charAt(0).toUpperCase() + status.slice(1)} (
-              {technicians.filter(
-                (t) => t.verification_status === status || status === "all"
-              ).length}
-              )
+              {s.charAt(0).toUpperCase() + s.slice(1)} ({countOf(s)})
             </button>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Technicians List */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-              {loading ? (
-                <div className="p-8 text-center text-gray-500">Loading...</div>
-              ) : filteredTechnicians.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  No technicians found
-                </div>
-              ) : (
-                <div className="divide-y divide-gray-200">
-                  {filteredTechnicians.map((tech) => (
-                    <div
-                      key={tech.id}
-                      onClick={() => setSelectedTech(tech)}
-                      className={`p-6 cursor-pointer transition ${
-                        selectedTech?.id === tech.id
-                          ? "bg-blue-50 border-l-4 border-blue-600"
-                          : "hover:bg-gray-50"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-bold text-gray-900">
-                            {tech.name}
-                          </h3>
-                          <p className="text-sm text-gray-600">{tech.email}</p>
-                          <p className="text-sm text-gray-600">{tech.phone}</p>
-                          <div className="mt-2 flex gap-2">
-                            {tech.specialties.map((spec) => (
-                              <span
-                                key={spec}
-                                className="inline-block px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded"
-                              >
-                                {spec}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span
-                            className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${
-                              tech.verification_status === "approved"
-                                ? "bg-green-100 text-green-800"
-                                : tech.verification_status === "rejected"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}
-                          >
-                            {tech.verification_status.charAt(0).toUpperCase() +
-                              tech.verification_status.slice(1)}
-                          </span>
-                          {tech.rating > 0 && (
-                            <div className="text-sm font-medium mt-2">
-                              ⭐ {tech.rating.toFixed(1)}{" "}
-                              <span className="text-gray-600">
-                                ({tech.total_jobs} jobs)
-                              </span>
-                            </div>
-                          )}
+        <div className="grid gap-6 lg:grid-cols-3">
+          {/* List */}
+          <div className="lg:col-span-2 rounded-xl border border-slate-200 bg-white overflow-hidden">
+            {loading ? (
+              <div className="p-10 text-center text-slate-500">Loading...</div>
+            ) : filtered.length === 0 ? (
+              <div className="p-10 text-center text-slate-500">No technicians found</div>
+            ) : (
+              <div className="divide-y divide-slate-100">
+                {filtered.map((tech) => (
+                  <div
+                    key={tech.id}
+                    onClick={() => setSelectedTech(tech)}
+                    className={`cursor-pointer p-5 transition hover:bg-slate-50 ${
+                      selectedTech?.id === tech.id ? "border-l-4 border-sky-600 bg-sky-50" : ""
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-semibold text-slate-900">{tech.name}</p>
+                        <p className="text-sm text-slate-500">{tech.email}</p>
+                        {tech.phone && <p className="text-sm text-slate-500">{tech.phone}</p>}
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {(tech.specialties ?? []).map((s) => (
+                            <span key={s} className="rounded bg-purple-100 px-2 py-0.5 text-xs text-purple-800">
+                              {s}
+                            </span>
+                          ))}
                         </div>
                       </div>
+                      <div className="text-right shrink-0 ml-4">
+                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${statusColors[tech.verification_status] ?? ""}`}>
+                          {tech.verification_status}
+                        </span>
+                        {tech.rating > 0 && (
+                          <p className="mt-1 text-sm text-slate-600">
+                            ⭐ {tech.rating.toFixed(1)} ({tech.total_jobs} jobs)
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Details Panel */}
+          {/* Detail panel */}
           {selectedTech && (
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="font-bold text-lg text-gray-900 mb-4">
-                {selectedTech.name}
-              </h2>
-
-              <div className="space-y-4 mb-6">
+            <div className="rounded-xl border border-slate-200 bg-white p-6">
+              <h2 className="mb-4 text-lg font-bold text-slate-900">{selectedTech.name}</h2>
+              <div className="space-y-3 text-sm">
                 <div>
-                  <p className="text-xs text-gray-600 uppercase font-semibold">
-                    Bio
-                  </p>
-                  <p className="text-sm text-gray-900 mt-1">
-                    {selectedTech.bio || "No bio provided"}
-                  </p>
+                  <p className="text-xs font-semibold uppercase text-slate-500">Bio</p>
+                  <p className="mt-1 text-slate-800">{selectedTech.bio || "—"}</p>
                 </div>
-
                 <div>
-                  <p className="text-xs text-gray-600 uppercase font-semibold">
-                    Specialties
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-2">
-                    {selectedTech.specialties.map((spec) => (
-                      <span
-                        key={spec}
-                        className="inline-block px-2 py-1 text-xs bg-purple-100 text-purple-800 rounded"
-                      >
-                        {spec}
-                      </span>
+                  <p className="text-xs font-semibold uppercase text-slate-500">Specialties</p>
+                  <div className="mt-1 flex flex-wrap gap-1">
+                    {(selectedTech.specialties ?? []).map((s) => (
+                      <span key={s} className="rounded bg-purple-100 px-2 py-0.5 text-xs text-purple-800">{s}</span>
                     ))}
                   </div>
                 </div>
-
                 <div>
-                  <p className="text-xs text-gray-600 uppercase font-semibold">
-                    Documents
-                  </p>
-                  <div className="mt-2 space-y-2">
-                    {selectedTech.documents.map((doc, idx) => (
-                      <a
-                        key={idx}
-                        href={doc.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block text-sm text-blue-600 hover:text-blue-900 break-all"
-                      >
-                        {doc.name} ({doc.type})
-                      </a>
-                    ))}
+                  <p className="text-xs font-semibold uppercase text-slate-500">Documents</p>
+                  <div className="mt-1 space-y-1">
+                    {(selectedTech.documents ?? []).length === 0 ? (
+                      <p className="text-slate-500">No documents</p>
+                    ) : (
+                      selectedTech.documents.map((doc, i) => (
+                        <a key={i} href={doc.url} target="_blank" rel="noopener noreferrer"
+                          className="block text-sky-600 hover:underline break-all">
+                          {doc.name} ({doc.type})
+                        </a>
+                      ))
+                    )}
                   </div>
                 </div>
-
-                <div>
-                  <p className="text-xs text-gray-600 uppercase font-semibold">
-                    Submitted
-                  </p>
-                  <p className="text-sm text-gray-900 mt-1">
-                    {new Date(selectedTech.submitted_at).toLocaleDateString()}
-                  </p>
-                </div>
+                {selectedTech.submitted_at && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase text-slate-500">Submitted</p>
+                    <p className="mt-1 text-slate-800">{new Date(selectedTech.submitted_at).toLocaleDateString()}</p>
+                  </div>
+                )}
+                {selectedTech.rejection_reason && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase text-slate-500">Rejection Reason</p>
+                    <p className="mt-1 text-red-700">{selectedTech.rejection_reason}</p>
+                  </div>
+                )}
               </div>
 
-              {selectedTech.verification_status === "pending" && (
-                <div className="space-y-3">
-                  <button
-                    onClick={() => handleApproveTechnician(selectedTech.id)}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition"
-                  >
-                    Approve Technician
-                  </button>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Rejection Reason (if rejecting)
-                    </label>
+              <div className="mt-6 space-y-2">
+                {selectedTech.verification_status === "pending" && (
+                  <>
+                    <button
+                      disabled={actionLoading}
+                      onClick={() => void handleApprove(selectedTech.id)}
+                      className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 disabled:opacity-60"
+                    >
+                      Approve
+                    </button>
                     <textarea
                       value={rejectionReason}
                       onChange={(e) => setRejectionReason(e.target.value)}
-                      placeholder="Enter reason for rejection..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-red-500"
-                      rows={3}
+                      placeholder="Rejection reason…"
+                      rows={2}
+                      className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     />
-                  </div>
-
+                    <button
+                      disabled={actionLoading}
+                      onClick={() => void handleReject(selectedTech.id)}
+                      className="w-full rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white hover:bg-red-500 disabled:opacity-60"
+                    >
+                      Reject
+                    </button>
+                  </>
+                )}
+                {selectedTech.is_active && (
                   <button
-                    onClick={() =>
-                      handleRejectTechnician(selectedTech.id)
-                    }
-                    className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-4 rounded-lg transition"
+                    disabled={actionLoading}
+                    onClick={() => void handleSuspend(selectedTech.id)}
+                    className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-60"
                   >
-                    Reject Technician
+                    Suspend Account
                   </button>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
         </div>

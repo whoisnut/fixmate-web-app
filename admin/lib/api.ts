@@ -5,60 +5,66 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  if (token) config.headers.Authorization = `Bearer ${token}`;
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('token');
+    if (token) config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 
 api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
-    if (error.response?.status === 401) {
-      // Handle unauthorized - clear token and redirect to login
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
       localStorage.removeItem('token');
       localStorage.removeItem('admin_user');
-      window.location.reload();
     }
     return Promise.reject(error);
   }
 );
 
-// Admin utility methods
 export const adminApi = {
-  // Refresh token
-  refreshToken: (refreshToken: string) =>
-    api.post('/api/auth/refresh', { refresh_token: refreshToken }),
-
-  // Logout
+  // Auth
   logout: () => api.post('/api/auth/logout'),
 
-  // Get all users (admin only)
+  // Users
   getUsers: () => api.get('/api/admin/users'),
+  suspendUser: (userId: string) => api.post(`/api/admin/users/${userId}/suspend`),
+  unsuspendUser: (userId: string) => api.post(`/api/admin/users/${userId}/unsuspend`),
 
-  // Get all payments (admin only)
-  getPayments: () => api.get('/api/payments/all'),
+  // Technicians
+  getTechnicians: () => api.get('/api/admin/technicians'),
+  verifyTechnician: (technicianId: string) => api.post(`/api/admin/technicians/${technicianId}/verify`),
+  rejectTechnician: (technicianId: string, reason: string) =>
+    api.post(`/api/admin/technicians/${technicianId}/reject`, { reason }),
+  suspendTechnician: (technicianId: string) => api.post(`/api/admin/technicians/${technicianId}/suspend`),
+  getLowRatedTechnicians: (minRating = 3.0) =>
+    api.get(`/api/admin/technicians/low-rated?min_rating=${minRating}`),
+  getTechnicianStats: (technicianId: string) =>
+    api.get(`/api/admin/technicians/${technicianId}/stats`),
 
-  // Update payment status (admin only)
-  updatePaymentStatus: (paymentId: string, status: string) =>
-    api.put(`/api/payments/${paymentId}`, { status }),
+  // Bookings (admin can see all via GET /api/bookings as admin role)
+  getBookings: () => api.get('/api/bookings'),
+  updateBookingStatus: (bookingId: string, status: string) =>
+    api.put(`/api/bookings/${bookingId}`, { status }),
 
-  // Get analytics (admin only)
-  getAnalytics: () => api.get('/api/admin/analytics'),
+  // Payouts
+  getPayouts: (status?: string) =>
+    api.get(status ? `/api/payouts?status=${status}` : '/api/payouts'),
+  approvePayout: (payoutId: string) => api.post(`/api/payouts/${payoutId}/approve`),
+  rejectPayout: (payoutId: string, reason: string) =>
+    api.post(`/api/payouts/${payoutId}/reject`, { reason }),
+  completePayout: (payoutId: string) => api.post(`/api/payouts/${payoutId}/complete`),
 
-  // Get technician stats (admin only)
-  getTechnicianStats: () => api.get('/api/admin/technicians/stats'),
+  // Analytics
+  getAnalyticsOverview: (days = 30) => api.get(`/api/admin/analytics/overview?days=${days}`),
+  getBookingAnalytics: (days = 30) => api.get(`/api/admin/analytics/bookings?days=${days}`),
+  getRevenueAnalytics: (days = 30) => api.get(`/api/admin/analytics/revenue?days=${days}`),
+  getTopTechnicians: (limit = 10) => api.get(`/api/admin/top-technicians?limit=${limit}`),
 
-  // Verify technician
-  verifyTechnician: (technicianId: string) =>
-    api.post(`/api/admin/technicians/${technicianId}/verify`),
-
-  // Suspend user
-  suspendUser: (userId: string) =>
-    api.post(`/api/admin/users/${userId}/suspend`),
-
-  // Unsuspend user
-  unsuspendUser: (userId: string) =>
-    api.post(`/api/admin/users/${userId}/unsuspend`),
+  // Reviews
+  getReviews: () => api.get('/api/admin/reviews'),
+  deleteReview: (reviewId: string) => api.delete(`/api/admin/reviews/${reviewId}`),
 };
 
 export default api;

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.core.database import get_db
 from app.core.deps import get_current_user
 from app.models.user import User
@@ -79,17 +79,32 @@ def get_all_payouts(
     current_user: User = Depends(verify_admin)
 ):
     """Get all payout requests (admin only)"""
-    query = db.query(Payout)
-    
+    query = db.query(Payout).options(joinedload(Payout.user))
     if status:
         query = query.filter(Payout.status == status)
-    
     payouts = query.all()
+    result = [
+        {
+            "id": p.id,
+            "user_id": p.user_id,
+            "technician_name": p.user.name if p.user else "N/A",
+            "amount": p.amount,
+            "status": p.status,
+            "reason": p.reason,
+            "request_date": p.requested_at.isoformat() if p.requested_at else None,
+            "approved_date": p.processed_at.isoformat() if p.processed_at else None,
+            "account_details": {
+                "payment_method": p.method,
+                "account_number": p.payment_account,
+            },
+        }
+        for p in payouts
+    ]
     return {
-        "total": len(payouts),
-        "pending": len([p for p in payouts if p.status == "pending"]),
-        "approved": len([p for p in payouts if p.status == "approved"]),
-        "payouts": payouts
+        "total": len(result),
+        "pending": len([p for p in result if p["status"] == "pending"]),
+        "approved": len([p for p in result if p["status"] == "approved"]),
+        "payouts": result,
     }
 
 @router.post("/{payout_id}/approve", response_model=PayoutResponse)

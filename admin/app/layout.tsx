@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import AdminNav from "@/components/AdminNav";
 
 const displaySans = Space_Grotesk({
   variable: "--font-display-sans",
@@ -24,8 +25,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${displaySans.variable} ${monoSans.variable} antialiased`}>
-        {children}
+      <body className={`${displaySans.variable} ${monoSans.variable} antialiased bg-slate-50`}>
+        <AdminNav />
+        <main>{children}</main>
       </body>
     </html>
   );

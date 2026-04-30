@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, Body
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.deps import get_current_user
@@ -93,6 +93,23 @@ def update_technician_location(
     db.commit()
     db.refresh(technician)
     
+    return {"current_lat": technician.current_lat, "current_lng": technician.current_lng}
+
+@router.put("/location")
+def update_location_json(
+    body: dict = Body(...),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Update technician location via JSON body (mobile-friendly)"""
+    if current_user.role != "technician":
+        raise HTTPException(status_code=403, detail="Only technicians can access this")
+    technician = db.query(Technician).filter(Technician.user_id == current_user.id).first()
+    if not technician:
+        raise HTTPException(status_code=404, detail="Technician profile not found")
+    technician.current_lat = body.get("lat")
+    technician.current_lng = body.get("lng")
+    db.commit()
     return {"current_lat": technician.current_lat, "current_lng": technician.current_lng}
 
 @router.put("/technician/specialties")

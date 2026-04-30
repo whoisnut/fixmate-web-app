@@ -5,6 +5,7 @@ from app.core.database import Base, SessionLocal, engine
 from app.models import user, service, booking  # noqa: F401 – registers all models
 from app.models.service import Category, Service
 from app.routers import auth, services, bookings, profile, payments, payment_methods, reviews, admin, payouts, messages
+from app.routers import websocket as ws_router
 
 # Create all tables on startup (safe to call multiple times)
 Base.metadata.create_all(bind=engine)
@@ -198,6 +199,7 @@ app.include_router(reviews.router)
 app.include_router(admin.router)
 app.include_router(payouts.router)
 app.include_router(messages.router)
+app.include_router(ws_router.router)
 
 @app.get("/")
 def root():
