@@ -18,7 +18,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passwordController = TextEditingController();
   bool _isLoading = false;
   bool _obscurePassword = true;
-  String _userType = 'customer'; // 'customer' or 'technician'
+  String _userType = 'customer'; // 'customer', 'technician', or 'admin'
 
   String _extractErrorMessage(Object error, String fallback) {
     final message = error.toString();
@@ -63,6 +63,12 @@ class _LoginScreenState extends State<LoginScreen> {
           'email': _emailController.text.trim(),
           'password': _passwordController.text,
         });
+        // Verify the account's actual role matches selected type
+        final userData = response.data['user'] as Map<String, dynamic>?;
+        final actualRole = userData?['role'] as String?;
+        if (_userType == 'admin' && actualRole != 'admin') {
+          throw Exception('This account is not an admin account.');
+        }
       }
 
       if (response.statusCode != 200) {
@@ -211,12 +217,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                     'customer',
                                   ),
                                 ),
-                                const SizedBox(width: 12),
+                                const SizedBox(width: 8),
                                 Expanded(
                                   child: _buildUserTypeButton(
                                     'Technician',
                                     Icons.construction,
                                     'technician',
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: _buildUserTypeButton(
+                                    'Admin',
+                                    Icons.admin_panel_settings,
+                                    'admin',
                                   ),
                                 ),
                               ],

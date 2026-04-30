@@ -22,11 +22,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
+  String _selectedRole = 'customer';
+
+  static const _roles = [
+    _RoleOption(
+      value: 'customer',
+      label: 'User',
+      description: 'Book home services',
+      icon: Icons.person,
+    ),
+    _RoleOption(
+      value: 'technician',
+      label: 'Technician',
+      description: 'Provide repair services',
+      icon: Icons.build,
+    ),
+    _RoleOption(
+      value: 'admin',
+      label: 'Admin',
+      description: 'Manage the platform',
+      icon: Icons.admin_panel_settings,
+    ),
+  ];
 
   String _extractErrorMessage(Object error, String fallback) {
     final message = error.toString();
-    if (message.contains('Email already registered') ||
-        message.contains('Email already registered'.toLowerCase())) {
+    if (message.contains('Email already registered')) {
       return 'This email already exists. Please sign in instead.';
     }
     if (message.contains('Phone number already registered')) {
@@ -45,9 +66,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String _detailFromResponse(dynamic data, String fallback) {
     if (data is Map<String, dynamic>) {
       final detail = data['detail'];
-      if (detail is String && detail.isNotEmpty) {
-        return detail;
-      }
+      if (detail is String && detail.isNotEmpty) return detail;
     }
     return fallback;
   }
@@ -63,7 +82,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'email': _emailController.text.trim(),
         'phone': _phoneController.text.trim(),
         'password': _passwordController.text,
-        'role': 'customer',
+        'role': _selectedRole,
       });
 
       if (response.statusCode != 200 && response.statusCode != 201) {
@@ -79,7 +98,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
           AppConstants.userKey, jsonEncode(response.data['user']));
 
       if (mounted) {
-        Navigator.pushReplacementNamed(context, AppRoutes.home);
+        final route = _selectedRole == 'technician'
+            ? AppRoutes.technicianHome
+            : AppRoutes.home;
+        Navigator.pushReplacementNamed(context, route);
       }
     } catch (e) {
       if (mounted) {
@@ -113,21 +135,95 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: [
                 const Text(
                   'Create Account',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
                   textAlign: TextAlign.center,
                 ),
                 const Text(
                   'Sign up to get started',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: AppTheme.textSecondary,
-                  ),
+                  style: TextStyle(fontSize: 16, color: AppTheme.textSecondary),
                   textAlign: TextAlign.center,
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 28),
+
+                // Role selector
+                const Text(
+                  'I am a...',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: AppTheme.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Row(
+                  children: _roles.map((role) {
+                    final selected = _selectedRole == role.value;
+                    return Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          right: role.value != 'admin' ? 8 : 0,
+                        ),
+                        child: GestureDetector(
+                          onTap: () =>
+                              setState(() => _selectedRole = role.value),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 14, horizontal: 8),
+                            decoration: BoxDecoration(
+                              color: selected
+                                  ? AppTheme.primary.withValues(alpha: 0.08)
+                                  : Colors.white,
+                              border: Border.all(
+                                color: selected
+                                    ? AppTheme.primary
+                                    : AppTheme.borderColor,
+                                width: selected ? 2 : 1,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Column(
+                              children: [
+                                Icon(
+                                  role.icon,
+                                  size: 26,
+                                  color: selected
+                                      ? AppTheme.primary
+                                      : AppTheme.textSecondary,
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  role.label,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: selected
+                                        ? AppTheme.primary
+                                        : AppTheme.textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  role.description,
+                                  style: const TextStyle(
+                                    fontSize: 9,
+                                    color: AppTheme.textSecondary,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+                ),
+
+                const SizedBox(height: 24),
+
                 TextFormField(
                   controller: _nameController,
                   decoration: const InputDecoration(
@@ -184,9 +280,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: Icon(_obscurePassword
                           ? Icons.visibility
                           : Icons.visibility_off),
-                      onPressed: () {
-                        setState(() => _obscurePassword = !_obscurePassword);
-                      },
+                      onPressed: () =>
+                          setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ),
                   obscureText: _obscurePassword,
@@ -210,10 +305,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       icon: Icon(_obscureConfirmPassword
                           ? Icons.visibility
                           : Icons.visibility_off),
-                      onPressed: () {
-                        setState(() =>
-                            _obscureConfirmPassword = !_obscureConfirmPassword);
-                      },
+                      onPressed: () => setState(() =>
+                          _obscureConfirmPassword = !_obscureConfirmPassword),
                     ),
                   ),
                   obscureText: _obscureConfirmPassword,
@@ -237,10 +330,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     const Text("Already have an account? "),
                     TextButton(
-                      onPressed: () {
-                        Navigator.pushReplacementNamed(
-                            context, AppRoutes.login);
-                      },
+                      onPressed: () => Navigator.pushReplacementNamed(
+                          context, AppRoutes.login),
                       child: const Text('Sign In'),
                     ),
                   ],
@@ -252,4 +343,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ),
     );
   }
+}
+
+class _RoleOption {
+  final String value;
+  final String label;
+  final String description;
+  final IconData icon;
+
+  const _RoleOption({
+    required this.value,
+    required this.label,
+    required this.description,
+    required this.icon,
+  });
 }
