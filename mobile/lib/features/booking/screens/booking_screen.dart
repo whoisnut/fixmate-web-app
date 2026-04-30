@@ -105,10 +105,12 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
       ref.invalidate(bookingsProvider);
 
       if (mounted) {
+        // Capture navigator before dialog opens so context stays valid
+        final nav = Navigator.of(context);
         showDialog(
           context: context,
           barrierDismissible: false,
-          builder: (context) => AlertDialog(
+          builder: (dialogContext) => AlertDialog(
             title: const Row(
               children: [
                 Icon(Icons.check_circle, color: AppTheme.success),
@@ -121,9 +123,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
             actions: [
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context);
-                  Navigator.pushNamedAndRemoveUntil(
-                    context,
+                  nav.pushNamedAndRemoveUntil(
                     AppRoutes.home,
                     (route) => false,
                   );

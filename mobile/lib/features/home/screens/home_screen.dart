@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Category> categories = [];
   List<Map<String, dynamic>> recentBookings = [];
   bool isLoading = true;
+  bool _bookingsLoading = true;
 
   @override
   void initState() {
@@ -59,8 +60,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadRecentBookings() async {
     try {
       final response = await ApiClient().getBookings();
-      final data = (response.data as List).cast<Map<String, dynamic>>();
-
+      final raw = response.data;
+      if (raw is! List) {
+        if (mounted) setState(() => _bookingsLoading = false);
+        return;
+      }
+      final data = raw.cast<Map<String, dynamic>>();
       data.sort((a, b) {
         final aDate = DateTime.tryParse((a['created_at'] ?? '').toString()) ??
             DateTime.fromMillisecondsSinceEpoch(0);
@@ -68,18 +73,14 @@ class _HomeScreenState extends State<HomeScreen> {
             DateTime.fromMillisecondsSinceEpoch(0);
         return bDate.compareTo(aDate);
       });
-
       if (mounted) {
         setState(() {
           recentBookings = data.take(3).toList();
+          _bookingsLoading = false;
         });
       }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          recentBookings = [];
-        });
-      }
+    } catch (_) {
+      if (mounted) setState(() => _bookingsLoading = false);
     }
   }
 
@@ -264,7 +265,14 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    if (recentBookings.isEmpty)
+                    if (_bookingsLoading)
+                      const Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 24),
+                          child: CircularProgressIndicator(),
+                        ),
+                      )
+                    else if (recentBookings.isEmpty)
                       const Center(
                         child: Padding(
                           padding: EdgeInsets.all(32),
