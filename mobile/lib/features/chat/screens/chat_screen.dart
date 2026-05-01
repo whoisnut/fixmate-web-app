@@ -71,6 +71,34 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
+  void _showEtaSheet() {
+    const options = ['5 minutes', '10 minutes', '15 minutes', '20 minutes', '30 minutes', '1 hour'];
+    showModalBottomSheet(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Text('Send ETA', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ),
+            ...options.map((eta) => ListTile(
+              leading: const Icon(Icons.timer_outlined),
+              title: Text('Arriving in $eta'),
+              onTap: () {
+                Navigator.pop(ctx);
+                _messageController.text = 'ETA: I\'ll arrive in approximately $eta.';
+                _sendMessage();
+              },
+            )),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final messagesAsync = ref.watch(messageProvider);
@@ -81,6 +109,13 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         title: Text(widget.otherUserName),
         backgroundColor: Colors.white,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.timer_outlined),
+            tooltip: 'Send ETA',
+            onPressed: _showEtaSheet,
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -89,7 +124,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             child: messagesAsync.when(
               data: (messages) {
                 if (messages.isEmpty) {
-                  return Center(
+                  return const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -98,8 +133,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           size: 64,
                           color: AppTheme.borderColor,
                         ),
-                        const SizedBox(height: 16),
-                        const Text(
+                        SizedBox(height: 16),
+                        Text(
                           'No messages yet',
                           style: TextStyle(
                             fontSize: 16,
@@ -191,7 +226,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
           // Message Input
           Container(
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(top: BorderSide(color: AppTheme.borderColor)),
             ),

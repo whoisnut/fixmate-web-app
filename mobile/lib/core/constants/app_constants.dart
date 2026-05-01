@@ -59,6 +59,7 @@ class AppRoutes {
   static const String profile = '/profile';
   static const String bookingHistory = '/booking-history';
   static const String favorites = '/favorites';
+  static const String technicianPayout = '/technician-payout';
 }
 
 // HTTP Status codes

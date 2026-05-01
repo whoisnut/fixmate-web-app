@@ -18,6 +18,7 @@ class TechnicianHomeScreen extends StatefulWidget {
 class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
   late Future<List<dynamic>> _availableBookings;
   late Future<List<dynamic>> _activeBookings;
+  late Future<List<dynamic>> _historyBookings;
   String? _technicianName;
   int _selectedTabIndex = 0;
   Timer? _locationTimer;
@@ -28,6 +29,7 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
     _loadTechnicianData();
     _availableBookings = _fetchAvailableBookings();
     _activeBookings = _fetchActiveBookings();
+    _historyBookings = _fetchHistoryBookings();
   }
 
   @override
@@ -117,10 +119,37 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
     }
   }
 
+  Future<List<dynamic>> _fetchHistoryBookings() async {
+    try {
+      final completed = await ApiClient().get('/api/bookings?status=completed');
+      final cancelled = await ApiClient().get('/api/bookings?status=cancelled');
+      final c = (completed.statusCode == 200 && completed.data is List)
+          ? completed.data as List
+          : [];
+      final x = (cancelled.statusCode == 200 && cancelled.data is List)
+          ? cancelled.data as List
+          : [];
+      final all = [...c, ...x];
+      all.sort((a, b) {
+        final aDate = DateTime.tryParse(
+                ((a as Map<String, dynamic>)['created_at'] ?? '').toString()) ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        final bDate = DateTime.tryParse(
+                ((b as Map<String, dynamic>)['created_at'] ?? '').toString()) ??
+            DateTime.fromMillisecondsSinceEpoch(0);
+        return bDate.compareTo(aDate);
+      });
+      return all;
+    } catch (_) {
+      return [];
+    }
+  }
+
   void _refreshAll() {
     setState(() {
       _availableBookings = _fetchAvailableBookings();
       _activeBookings = _fetchActiveBookings();
+      _historyBookings = _fetchHistoryBookings();
     });
   }
 
@@ -200,6 +229,17 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.account_balance_wallet_outlined),
+            tooltip: 'Earnings & Payouts',
+            onPressed: () => Navigator.pushNamed(context, '/technician-payout'),
+          ),
+          IconButton(
+            icon: const Icon(Icons.manage_accounts_outlined),
+            tooltip: 'Profile Setup',
+            onPressed: () =>
+                Navigator.pushNamed(context, '/technician-profile-setup'),
+          ),
           IconButton(icon: const Icon(Icons.refresh), onPressed: _refreshAll),
           IconButton(icon: const Icon(Icons.logout), onPressed: _logout),
         ],
@@ -255,6 +295,7 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                       children: [
                         _buildTabButton('Available', 0),
                         _buildTabButton('Active Jobs', 1),
+                        _buildTabButton('History', 2),
                       ],
                     ),
                   ),
@@ -307,6 +348,32 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                                 ? bookings[index] as Map<String, dynamic>
                                 : jsonDecode(bookings[index].toString()) as Map<String, dynamic>;
                             return _buildActiveJobCard(b);
+                          },
+                        );
+                      },
+                    ),
+
+                  if (_selectedTabIndex == 2)
+                    FutureBuilder<List<dynamic>>(
+                      future: _historyBookings,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Center(child: CircularProgressIndicator());
+                        }
+                        final bookings = snapshot.data ?? [];
+                        if (bookings.isEmpty) {
+                          return _buildEmptyState(
+                              'No job history yet', Icons.history_outlined);
+                        }
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: bookings.length,
+                          itemBuilder: (context, index) {
+                            final b = bookings[index] is Map
+                                ? bookings[index] as Map<String, dynamic>
+                                : jsonDecode(bookings[index].toString()) as Map<String, dynamic>;
+                            return _buildHistoryJobCard(b);
                           },
                         );
                       },
@@ -522,6 +589,98 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                 ),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHistoryJobCard(Map<String, dynamic> booking) {
+    final bookingId = booking['id'] as String? ?? '';
+    final address = booking['address'] as String? ?? '';
+    final status = booking['status'] as String? ?? 'completed';
+    final service = booking['service'] as Map<String, dynamic>?;
+    final serviceName = service?['name'] as String? ?? 'Service';
+    final price = (booking['total_price'] as num?)?.toDouble() ?? 0;
+    final createdAtRaw = (booking['created_at'] ?? '').toString();
+    final createdAt = DateTime.tryParse(createdAtRaw);
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppTheme.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppTheme.borderColor),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(serviceName,
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: AppTheme.textPrimary)),
+              ),
+              _statusBadge(status),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              const Icon(Icons.location_on_outlined,
+                  size: 14, color: AppTheme.textSecondary),
+              const SizedBox(width: 4),
+              Expanded(
+                child: Text(address,
+                    style: const TextStyle(
+                        fontSize: 12, color: AppTheme.textSecondary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                createdAt != null
+                    ? '${createdAt.day}/${createdAt.month}/${createdAt.year}'
+                    : '',
+                style: const TextStyle(
+                    fontSize: 11, color: AppTheme.textTertiary),
+              ),
+              Text('\$$price',
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 14,
+                      color: AppTheme.primary)),
+            ],
+          ),
+          if (status == 'completed') ...[
+            const SizedBox(height: 10),
+            OutlinedButton.icon(
+              onPressed: () => Navigator.pushNamed(context, '/review',
+                  arguments: {
+                    'bookingId': bookingId,
+                    'technicianName': _technicianName ?? 'Technician',
+                    'technicianId': '',
+                  }),
+              icon: const Icon(Icons.star_outline, size: 16),
+              label: const Text('View Review'),
+              style: OutlinedButton.styleFrom(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                side: const BorderSide(color: AppTheme.primary),
+                minimumSize: Size.zero,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+            ),
+          ],
         ],
       ),
     );

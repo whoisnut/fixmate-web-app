@@ -17,6 +17,7 @@ import 'features/booking/screens/job_tracking_screen.dart';
 import 'features/profile/screens/profile_screen.dart';
 import 'features/review/screens/review_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
+import 'features/payment/screens/payout_screen.dart';
 import 'models/service.dart';
 
 void main() {
@@ -66,6 +67,8 @@ class FixMateApp extends StatelessWidget {
           case '/technician-profile-setup':
             return MaterialPageRoute(
                 builder: (_) => const TechnicianProfileSetupScreen());
+          case '/technician-payout':
+            return MaterialPageRoute(builder: (_) => const PayoutScreen());
           case '/job-tracking':
             final args = settings.arguments as Map<String, String>;
             return MaterialPageRoute(

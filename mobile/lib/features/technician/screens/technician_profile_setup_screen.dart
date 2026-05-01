@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
+import '../../../core/network/api_client.dart';
 
 class TechnicianProfileSetupScreen extends ConsumerStatefulWidget {
   const TechnicianProfileSetupScreen({super.key});
@@ -54,13 +55,19 @@ class _TechnicianProfileSetupScreenState
     setState(() => _isSubmitting = true);
 
     try {
-      // TODO: Call API to update technician profile
-      // await ref.read(technicianProvider.notifier).updateProfile(
-      //   bio: _bioController.text,
-      //   specialties: _selectedSpecialties,
-      //   serviceRadius: _serviceRadiusKm,
-      //   isAvailable: _isAvailable,
-      // );
+      final client = ApiClient();
+      await client.dio.put(
+        '/api/profile/technician/bio',
+        queryParameters: {'bio': _bioController.text.trim()},
+      );
+      await client.dio.put(
+        '/api/profile/technician/specialties',
+        queryParameters: {'specialties': _selectedSpecialties},
+      );
+      await client.dio.put(
+        '/api/profile/technician/availability',
+        queryParameters: {'is_available': _isAvailable},
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -258,7 +265,7 @@ class _TechnicianProfileSetupScreenState
                     onChanged: (value) {
                       setState(() => _isAvailable = value);
                     },
-                    activeColor: AppTheme.primary,
+                    activeThumbColor: AppTheme.primary,
                   ),
                 ],
               ),
