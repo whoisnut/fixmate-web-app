@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import api from "@/lib/api";
+import api, { adminApi } from "@/lib/api";
 
 type Overview = {
   total_users: number;
@@ -40,6 +40,7 @@ export default function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [period, setPeriod] = useState("month");
+  const [suspendingId, setSuspendingId] = useState<string | null>(null);
 
   useEffect(() => {
     void fetchAnalytics();
@@ -188,25 +189,53 @@ export default function AnalyticsDashboard() {
 
           {/* Low-rated technicians */}
           <div className="rounded-xl border border-slate-200 bg-white p-6">
-            <h2 className="mb-4 text-lg font-bold text-slate-900">Low-Rated Technicians</h2>
-            <p className="mb-4 text-sm text-slate-500">Below 3.0 rating — consider outreach or suspension</p>
+            <h2 className="mb-1 text-lg font-bold text-slate-900">Low-Rated Technicians</h2>
+            <p className="mb-4 text-sm text-slate-500">Below 3.0 rating — flag or suspend directly</p>
             {analytics.low_rated_technicians.length === 0 ? (
               <p className="py-6 text-center text-sm text-slate-500">No low-rated technicians 🎉</p>
             ) : (
               <div className="space-y-3">
                 {analytics.low_rated_technicians.map((tech) => (
                   <div key={tech.id} className="rounded-lg border border-red-200 bg-red-50 p-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between gap-2">
                       <div>
                         <p className="font-medium text-slate-900">{tech.name}</p>
                         <p className="text-sm text-red-600">⭐ {tech.rating.toFixed(1)} ({tech.total_jobs} jobs)</p>
                       </div>
-                      <a
-                        href="/technicians"
-                        className="rounded-md bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700"
-                      >
-                        Review
-                      </a>
+                      <div className="flex shrink-0 gap-2">
+                        <a
+                          href="/technicians"
+                          className="rounded-md border border-slate-300 bg-white px-3 py-1 text-xs font-medium text-slate-700 hover:bg-slate-100"
+                        >
+                          Details
+                        </a>
+                        <button
+                          onClick={async () => {
+                            setSuspendingId(tech.id);
+                            try {
+                              await adminApi.suspendTechnician(tech.id);
+                              setAnalytics((prev) =>
+                                prev
+                                  ? {
+                                      ...prev,
+                                      low_rated_technicians: prev.low_rated_technicians.filter(
+                                        (t) => t.id !== tech.id
+                                      ),
+                                    }
+                                  : prev
+                              );
+                            } catch {
+                              alert("Failed to suspend technician.");
+                            } finally {
+                              setSuspendingId(null);
+                            }
+                          }}
+                          disabled={suspendingId === tech.id}
+                          className="rounded-md bg-red-600 px-3 py-1 text-xs font-medium text-white hover:bg-red-700 disabled:opacity-50"
+                        >
+                          {suspendingId === tech.id ? "…" : "Suspend"}
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

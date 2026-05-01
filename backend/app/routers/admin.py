@@ -215,8 +215,9 @@ def get_all_reviews(
     current_user: User = Depends(verify_admin)
 ):
     reviews = db.query(Review).options(
-        joinedload(Review.booking)
-    ).all()
+        joinedload(Review.booking).joinedload(Booking.customer),
+        joinedload(Review.booking).joinedload(Booking.technician).joinedload(Technician.user),
+    ).order_by(Review.created_at.desc()).all()
     result = [
         {
             "id": r.id,
@@ -225,7 +226,13 @@ def get_all_reviews(
             "comment": r.comment,
             "created_at": r.created_at.isoformat() if r.created_at else None,
             "customer_id": r.booking.customer_id if r.booking else None,
+            "customer_name": r.booking.customer.name if r.booking and r.booking.customer else "Unknown",
             "technician_id": r.booking.technician_id if r.booking else None,
+            "technician_name": (
+                r.booking.technician.user.name
+                if r.booking and r.booking.technician and r.booking.technician.user
+                else "Unassigned"
+            ),
         }
         for r in reviews
     ]
