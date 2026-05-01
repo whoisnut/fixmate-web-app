@@ -37,7 +37,15 @@ class BookingRepository {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data as List<dynamic>;
-        return data.map((item) => item as Map<String, dynamic>).toList();
+        final list = data.map((item) => item as Map<String, dynamic>).toList();
+        list.sort((a, b) {
+          final aDate = DateTime.tryParse((a['created_at'] ?? '').toString()) ??
+              DateTime.fromMillisecondsSinceEpoch(0);
+          final bDate = DateTime.tryParse((b['created_at'] ?? '').toString()) ??
+              DateTime.fromMillisecondsSinceEpoch(0);
+          return bDate.compareTo(aDate);
+        });
+        return list;
       } else {
         throw Exception('Failed to fetch bookings');
       }
