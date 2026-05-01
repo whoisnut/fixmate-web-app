@@ -215,11 +215,51 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
               _buildTechnicianActions(context, ref, status, bookingId),
             ] else if (status == 'completed') ...[
               const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  // TODO: Navigate to rating screen
-                },
-                child: const Text('Rate Service'),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        final technicianId =
+                            booking['technician_id'] as String? ?? '';
+                        Navigator.pushNamed(context, '/review',
+                            arguments: {
+                              'bookingId': bookingId,
+                              'technicianName': 'Your Technician',
+                              'technicianId': technicianId,
+                            });
+                      },
+                      icon: const Icon(Icons.star_outline, size: 16),
+                      label: const Text('Rate'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.pushNamed(
+                          context, '/payment-checkout',
+                          arguments: booking),
+                      icon: const Icon(Icons.payment, size: 16),
+                      label: const Text('Pay'),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (status == 'accepted' || status == 'in_progress') ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/job-tracking',
+                      arguments: {
+                        'bookingId': bookingId,
+                        'technicianName': 'Your Technician',
+                      }),
+                  icon: const Icon(Icons.location_on, size: 16),
+                  label: const Text('Track Job'),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary),
+                ),
               ),
             ],
           ],

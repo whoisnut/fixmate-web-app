@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/constants/app_constants.dart';
 import '../providers/booking_provider.dart';
@@ -22,6 +23,26 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
   TimeOfDay? selectedTime;
   double? selectedLat;
   double? selectedLng;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedLocation();
+  }
+
+  Future<void> _loadSavedLocation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedAddress = prefs.getString('user_address');
+    final savedLat = prefs.getDouble('user_lat');
+    final savedLng = prefs.getDouble('user_lng');
+    if (savedAddress != null && savedLat != null && savedLng != null) {
+      setState(() {
+        _addressController.text = savedAddress;
+        selectedLat = savedLat;
+        selectedLng = savedLng;
+      });
+    }
+  }
 
   Future<void> _selectDate() async {
     final date = await showDatePicker(

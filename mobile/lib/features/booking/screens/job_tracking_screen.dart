@@ -30,6 +30,7 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
   double? _customerLng;
   double _estimatedMinutes = 0;
   String _jobStatus = 'accepted';
+  Map<String, dynamic>? _bookingData;
 
   StreamSubscription<Map<String, dynamic>>? _wsSub;
   String? _otherUserId;
@@ -59,6 +60,8 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
           _customerLat = lat;
           _customerLng = lng;
           _jobStatus = booking['status'] ?? 'accepted';
+          _otherUserId = booking['technician_id'] as String? ?? '';
+          _bookingData = booking;
         });
         _recalcEta();
       }
@@ -285,24 +288,66 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                     isActive: displayStatus == 'completed',
                     isCompleted: displayStatus == 'completed'),
                 const SizedBox(height: 20),
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    onPressed: _currentUserId != null
-                        ? () => Navigator.pushNamed(context, '/chat', arguments: {
+                if (_jobStatus == 'completed') ...[
+                  Row(
+                    children: [
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            '/payment-checkout',
+                            arguments: _bookingData ?? {'id': widget.bookingId},
+                          ),
+                          icon: const Icon(Icons.payment, size: 18),
+                          label: const Text('Pay Now'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () => Navigator.pushNamed(
+                            context,
+                            '/review',
+                            arguments: {
                               'bookingId': widget.bookingId,
-                              'otherUserName': widget.technicianName,
-                              'otherUserId': _otherUserId ?? '',
-                            })
-                        : null,
-                    icon: const Icon(Icons.chat),
-                    label: const Text('Contact Technician'),
-                    style: OutlinedButton.styleFrom(
-                      side: const BorderSide(color: AppTheme.primary),
+                              'technicianName': widget.technicianName,
+                              'technicianId': _otherUserId ?? '',
+                            },
+                          ),
+                          icon: const Icon(Icons.star_outline, size: 18),
+                          label: const Text('Rate'),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: AppTheme.primary),
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ] else ...[
+                  SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    child: OutlinedButton.icon(
+                      onPressed: _currentUserId != null
+                          ? () => Navigator.pushNamed(context, '/chat',
+                              arguments: {
+                                'bookingId': widget.bookingId,
+                                'otherUserName': widget.technicianName,
+                                'otherUserId': _otherUserId ?? '',
+                              })
+                          : null,
+                      icon: const Icon(Icons.chat),
+                      label: const Text('Contact Technician'),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppTheme.primary),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
