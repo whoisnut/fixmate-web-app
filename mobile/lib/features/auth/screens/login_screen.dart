@@ -1,3 +1,4 @@
+import 'package:dio/src/response.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
@@ -51,7 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = true);
 
     try {
-      late final response;
+      late final Response<dynamic> response;
 
       if (_userType == 'technician') {
         response = await ApiClient().post('/api/auth/login/technician', {
@@ -114,7 +115,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 40),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
                       AppTheme.primary,
@@ -243,9 +244,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Email Field
                       TextFormField(
                         controller: _emailController,
-                        decoration: InputDecoration(
+                        decoration: const InputDecoration(
                           labelText: 'Email Address',
-                          prefixIcon: const Icon(Icons.mail_outline),
+                          prefixIcon: Icon(Icons.mail_outline),
                           hintText: 'demo.login@fixmate.dev',
                         ),
                         keyboardType: TextInputType.emailAddress,

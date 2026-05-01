@@ -131,9 +131,9 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             const SizedBox(height: 32),
 
             // Rating Stars
-            Text(
+            const Text(
               'Rate Your Experience',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
@@ -178,9 +178,9 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
             const SizedBox(height: 32),
 
             // Comment Section
-            Text(
+            const Text(
               'Share Your Feedback',
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: AppTheme.textPrimary,
@@ -196,11 +196,11 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                 controller: _commentController,
                 maxLines: 5,
                 minLines: 4,
-                decoration: InputDecoration(
+                decoration: const InputDecoration(
                   hintText: 'Tell us about your experience...',
-                  hintStyle: const TextStyle(color: AppTheme.textTertiary),
+                  hintStyle: TextStyle(color: AppTheme.textTertiary),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.all(12),
+                  contentPadding: EdgeInsets.all(12),
                 ),
                 style: const TextStyle(color: AppTheme.textPrimary),
               ),
