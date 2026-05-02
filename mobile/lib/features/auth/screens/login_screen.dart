@@ -86,9 +86,19 @@ class _LoginScreenState extends State<LoginScreen> {
       // Store user type
       await prefs.setString('user_type', _userType);
 
+      final actualRole =
+          (response.data['user'] as Map<String, dynamic>?)?['role'] as String?;
+
       if (mounted) {
-        if (_userType == 'technician') {
+        if (actualRole == 'technician') {
           Navigator.pushReplacementNamed(context, AppRoutes.technicianHome);
+        } else if (actualRole == 'admin') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Admin accounts must use the web admin panel.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
         } else {
           Navigator.pushReplacementNamed(context, AppRoutes.home);
         }
