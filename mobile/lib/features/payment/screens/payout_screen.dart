@@ -25,7 +25,11 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
   Future<void> _loadStats() async {
     try {
       final stats = await ProfileRepository().getTechnicianStats();
-      if (mounted) setState(() { _stats = stats; _statsLoading = false; });
+      if (mounted)
+        setState(() {
+          _stats = stats;
+          _statsLoading = false;
+        });
     } catch (_) {
       if (mounted) setState(() => _statsLoading = false);
     }
@@ -59,7 +63,8 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
           } catch (e) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Failed: $e'), backgroundColor: Colors.red),
+                SnackBar(
+                    content: Text('Failed: $e'), backgroundColor: Colors.red),
               );
             }
           }
@@ -96,7 +101,8 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               if (_statsLoading)
-                const Center(child: Padding(
+                const Center(
+                    child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 20),
                   child: CircularProgressIndicator(),
                 ))
@@ -119,13 +125,11 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
                   ],
                 ),
               const SizedBox(height: 24),
-
               const Text(
                 'Payout History',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 12),
-
               payoutsAsync.when(
                 data: (payouts) {
                   if (payouts.isEmpty) {
@@ -173,7 +177,7 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color, size: 22),
@@ -218,7 +222,7 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: _methodColor(payout.method).withValues(alpha: 0.1),
+              color: _methodColor(payout.method).withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(_methodIcon(payout.method),
@@ -239,7 +243,7 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
+                        color: color.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(payout.status,
@@ -357,10 +361,8 @@ class _RequestPayoutSheetState extends State<_RequestPayoutSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Request Payout',
-                style:
-                    TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
             const SizedBox(height: 20),
-
             const Text('Payment Method',
                 style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
@@ -371,11 +373,9 @@ class _RequestPayoutSheetState extends State<_RequestPayoutSheet> {
                   child: Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: GestureDetector(
-                      onTap: () =>
-                          setState(() => _selectedMethod = method),
+                      onTap: () => setState(() => _selectedMethod = method),
                       child: Container(
-                        padding:
-                            const EdgeInsets.symmetric(vertical: 12),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? AppTheme.primary
@@ -404,7 +404,6 @@ class _RequestPayoutSheetState extends State<_RequestPayoutSheet> {
               }).toList(),
             ),
             const SizedBox(height: 16),
-
             const Text('Account Number / Phone',
                 style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
@@ -413,52 +412,47 @@ class _RequestPayoutSheetState extends State<_RequestPayoutSheet> {
               keyboardType: TextInputType.phone,
               decoration: InputDecoration(
                 hintText: 'e.g. 012 345 678',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 12),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               ),
             ),
             const SizedBox(height: 16),
-
             const Text('Amount (\$)',
                 style: TextStyle(fontWeight: FontWeight.w600)),
             const SizedBox(height: 8),
             TextField(
               controller: _amountController,
-              keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true),
+              keyboardType:
+                  const TextInputType.numberWithOptions(decimal: true),
               decoration: InputDecoration(
                 hintText: '0.00',
                 prefixText: '\$ ',
-                border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10)),
-                contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 12),
+                border:
+                    OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               ),
             ),
             const SizedBox(height: 24),
-
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: _isSubmitting ? null : _submit,
                 style: ElevatedButton.styleFrom(
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 14)),
+                    padding: const EdgeInsets.symmetric(vertical: 14)),
                 child: _isSubmitting
                     ? const SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation(
-                                Colors.white)),
+                            valueColor: AlwaysStoppedAnimation(Colors.white)),
                       )
                     : const Text('Submit Request',
                         style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600)),
+                            fontSize: 16, fontWeight: FontWeight.w600)),
               ),
             ),
           ],

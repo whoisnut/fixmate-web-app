@@ -244,7 +244,6 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
             const Text('Issue Type'),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              initialValue: issueType,
               hint: const Text('Select an issue type'),
               items: [
                 'Technical Issue',

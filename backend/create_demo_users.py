@@ -9,6 +9,20 @@ from datetime import datetime
 db = SessionLocal()
 
 try:
+    # Create admin user
+    admin_user = User(
+        name="Admin User",
+        email="admin@fixmate.dev",
+        phone="+1111111111",
+        password=hash_password("Admin1234"),
+        role="admin",
+        is_active=True,
+        created_at=datetime.utcnow()
+    )
+    db.add(admin_user)
+    db.commit()
+    print("✅ Admin user created")
+    
     # Create demo customer user
     demo_user = User(
         name="Demo User",
@@ -50,6 +64,9 @@ try:
     print("✅ Technician profile created")
     
     print("\n✅ All demo users created successfully!")
+    print("\nAdmin credentials:")
+    print("  Email: admin@fixmate.dev")
+    print("  Password: Admin1234")
     
 except Exception as e:
     print(f"❌ Error: {e}")

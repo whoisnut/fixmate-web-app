@@ -50,7 +50,8 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
 
   Future<void> _loadBookingDetails() async {
     try {
-      final response = await ApiClient().get('/api/bookings/${widget.bookingId}');
+      final response =
+          await ApiClient().get('/api/bookings/${widget.bookingId}');
       if (response.statusCode == 200) {
         final booking = response.data as Map<String, dynamic>;
         final lat = (booking['lat'] as num?)?.toDouble();
@@ -91,7 +92,8 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
           });
           _recalcEta();
         }
-      } else if (type == 'booking_status' && data['booking_id'] == widget.bookingId) {
+      } else if (type == 'booking_status' &&
+          data['booking_id'] == widget.bookingId) {
         final status = data['status'] as String?;
         if (status != null) {
           setState(() {
@@ -99,7 +101,8 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
             if (status == 'completed') _estimatedMinutes = 0;
           });
         }
-      } else if (type == 'eta_update' && data['booking_id'] == widget.bookingId) {
+      } else if (type == 'eta_update' &&
+          data['booking_id'] == widget.bookingId) {
         final eta = (data['eta_minutes'] as num?)?.toDouble();
         if (eta != null) setState(() => _estimatedMinutes = eta);
       }
@@ -107,17 +110,20 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
   }
 
   void _recalcEta() {
-    if (_technicianLat == null || _technicianLng == null ||
-        _customerLat == null || _customerLng == null) {
+    if (_technicianLat == null ||
+        _technicianLng == null ||
+        _customerLat == null ||
+        _customerLng == null) {
       return;
     }
     final distKm = _haversineKm(
-      _technicianLat!, _technicianLng!, _customerLat!, _customerLng!);
+        _technicianLat!, _technicianLng!, _customerLat!, _customerLng!);
     // Assume 30 km/h average speed in urban area
     setState(() => _estimatedMinutes = (distKm / 30.0 * 60).roundToDouble());
   }
 
-  static double _haversineKm(double lat1, double lon1, double lat2, double lon2) {
+  static double _haversineKm(
+      double lat1, double lon1, double lat2, double lon2) {
     const r = 6371.0;
     final phi1 = lat1 * math.pi / 180;
     final phi2 = lat2 * math.pi / 180;
@@ -130,10 +136,14 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
 
   String _displayStatus() {
     switch (_jobStatus) {
-      case 'accepted': return 'on_the_way';
-      case 'in_progress': return 'in_progress';
-      case 'completed': return 'completed';
-      default: return _jobStatus;
+      case 'accepted':
+        return 'on_the_way';
+      case 'in_progress':
+        return 'in_progress';
+      case 'completed':
+        return 'completed';
+      default:
+        return _jobStatus;
     }
   }
 
@@ -160,17 +170,21 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                       children: [
                         Icon(Icons.map, size: 64, color: Colors.grey[400]),
                         const SizedBox(height: 16),
-                        Text('Live Map', style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+                        Text('Live Map',
+                            style: TextStyle(
+                                fontSize: 16, color: Colors.grey[600])),
                         const SizedBox(height: 8),
                         if (_technicianLat != null)
                           Text(
                             'Technician: ${_technicianLat!.toStringAsFixed(4)}, ${_technicianLng!.toStringAsFixed(4)}',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[500]),
                           )
                         else
                           Text(
                             'Waiting for technician location…',
-                            style: TextStyle(fontSize: 12, color: Colors.grey[500]),
+                            style: TextStyle(
+                                fontSize: 12, color: Colors.grey[500]),
                           ),
                       ],
                     ),
@@ -188,7 +202,7 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                         border: Border.all(color: AppTheme.borderColor),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
+                            color: Colors.black.withOpacity(0.08),
                             blurRadius: 10,
                             offset: const Offset(0, -2),
                           ),
@@ -200,10 +214,11 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.1),
+                              color: AppTheme.primary.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.person, color: AppTheme.primary),
+                            child: const Icon(Icons.person,
+                                color: AppTheme.primary),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -230,7 +245,8 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                               ],
                             ),
                           ),
-                          if (_estimatedMinutes > 0 && _jobStatus != 'completed')
+                          if (_estimatedMinutes > 0 &&
+                              _jobStatus != 'completed')
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
@@ -242,7 +258,10 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                                     color: AppTheme.primary,
                                   ),
                                 ),
-                                const Text('ETA', style: TextStyle(fontSize: 11, color: AppTheme.textTertiary)),
+                                const Text('ETA',
+                                    style: TextStyle(
+                                        fontSize: 11,
+                                        color: AppTheme.textTertiary)),
                               ],
                             ),
                         ],
@@ -272,12 +291,15 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                       ),
                 ),
                 const SizedBox(height: 16),
-                _buildTimelineItem('On the Way', 'Technician is heading to your location',
+                _buildTimelineItem(
+                    'On the Way', 'Technician is heading to your location',
                     isActive: displayStatus == 'on_the_way',
-                    isCompleted: ['arrived', 'in_progress', 'completed'].contains(displayStatus)),
+                    isCompleted: ['arrived', 'in_progress', 'completed']
+                        .contains(displayStatus)),
                 _buildTimelineItem('Arrived', 'Technician has arrived',
                     isActive: displayStatus == 'arrived',
-                    isCompleted: ['in_progress', 'completed'].contains(displayStatus)),
+                    isCompleted:
+                        ['in_progress', 'completed'].contains(displayStatus)),
                 _buildTimelineItem('In Progress', 'Work is being done',
                     isActive: displayStatus == 'in_progress',
                     isCompleted: displayStatus == 'completed'),
@@ -290,7 +312,8 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                   height: 48,
                   child: OutlinedButton.icon(
                     onPressed: _currentUserId != null
-                        ? () => Navigator.pushNamed(context, '/chat', arguments: {
+                        ? () =>
+                            Navigator.pushNamed(context, '/chat', arguments: {
                               'bookingId': widget.bookingId,
                               'otherUserName': widget.technicianName,
                               'otherUserId': _otherUserId ?? '',
@@ -326,13 +349,17 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: isCompleted ? Colors.green : isActive ? AppTheme.primary : AppTheme.borderColor,
+                    color: isCompleted
+                        ? Colors.green
+                        : isActive
+                            ? AppTheme.primary
+                            : AppTheme.borderColor,
                     width: 2,
                   ),
                   color: isCompleted
-                      ? Colors.green.withValues(alpha: 0.1)
+                      ? Colors.green.withOpacity(0.1)
                       : isActive
-                          ? AppTheme.primary.withValues(alpha: 0.1)
+                          ? AppTheme.primary.withOpacity(0.1)
                           : Colors.transparent,
                 ),
                 child: Center(
@@ -351,7 +378,10 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                 ),
               ),
               if (title != 'Completed')
-                Container(width: 2, height: 20, color: isCompleted ? Colors.green : AppTheme.borderColor),
+                Container(
+                    width: 2,
+                    height: 20,
+                    color: isCompleted ? Colors.green : AppTheme.borderColor),
             ],
           ),
           const SizedBox(width: 16),
@@ -364,12 +394,17 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: isActive ? AppTheme.primary : isCompleted ? Colors.green : AppTheme.textPrimary,
+                    color: isActive
+                        ? AppTheme.primary
+                        : isCompleted
+                            ? Colors.green
+                            : AppTheme.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(description,
-                    style: const TextStyle(fontSize: 12, color: AppTheme.textSecondary)),
+                    style: const TextStyle(
+                        fontSize: 12, color: AppTheme.textSecondary)),
               ],
             ),
           ),
@@ -380,21 +415,31 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
 
   String _getStatusText(String status) {
     switch (status) {
-      case 'on_the_way': return 'On the way…';
-      case 'arrived': return 'Arrived';
-      case 'in_progress': return 'Working on it';
-      case 'completed': return 'Job completed';
-      default: return 'Processing…';
+      case 'on_the_way':
+        return 'On the way…';
+      case 'arrived':
+        return 'Arrived';
+      case 'in_progress':
+        return 'Working on it';
+      case 'completed':
+        return 'Job completed';
+      default:
+        return 'Processing…';
     }
   }
 
   Color _getStatusColor(String status) {
     switch (status) {
-      case 'on_the_way': return AppTheme.primary;
-      case 'arrived': return Colors.orange;
-      case 'in_progress': return Colors.blue;
-      case 'completed': return Colors.green;
-      default: return AppTheme.textSecondary;
+      case 'on_the_way':
+        return AppTheme.primary;
+      case 'arrived':
+        return Colors.orange;
+      case 'in_progress':
+        return Colors.blue;
+      case 'completed':
+        return Colors.green;
+      default:
+        return AppTheme.textSecondary;
     }
   }
 }

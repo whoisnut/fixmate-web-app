@@ -172,7 +172,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                                 vertical: 14, horizontal: 8),
                             decoration: BoxDecoration(
                               color: selected
-                                  ? AppTheme.primary.withValues(alpha: 0.08)
+                                  ? AppTheme.primary.withOpacity(0.08)
                                   : Colors.white,
                               border: Border.all(
                                 color: selected

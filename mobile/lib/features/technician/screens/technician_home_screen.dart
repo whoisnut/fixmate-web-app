@@ -272,7 +272,9 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                   Text(
                     _technicianName ?? 'Technician',
                     style: const TextStyle(
-                        fontSize: 28, fontWeight: FontWeight.w700, color: Colors.white),
+                        fontSize: 28,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white),
                   ),
                 ],
               ),
@@ -305,13 +307,16 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                     FutureBuilder<List<dynamic>>(
                       future: _availableBookings,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                         final bookings = snapshot.data ?? [];
                         if (bookings.isEmpty) {
                           return _buildEmptyState(
-                              'No available bookings nearby', Icons.calendar_today_outlined);
+                              'No available bookings nearby',
+                              Icons.calendar_today_outlined);
                         }
                         return ListView.builder(
                           shrinkWrap: true,
@@ -320,7 +325,8 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                           itemBuilder: (context, index) {
                             final b = bookings[index] is Map
                                 ? bookings[index] as Map<String, dynamic>
-                                : jsonDecode(bookings[index].toString()) as Map<String, dynamic>;
+                                : jsonDecode(bookings[index].toString())
+                                    as Map<String, dynamic>;
                             return _buildAvailableBookingCard(b);
                           },
                         );
@@ -331,8 +337,10 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                     FutureBuilder<List<dynamic>>(
                       future: _activeBookings,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                         final bookings = snapshot.data ?? [];
                         if (bookings.isEmpty) {
@@ -346,7 +354,8 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                           itemBuilder: (context, index) {
                             final b = bookings[index] is Map
                                 ? bookings[index] as Map<String, dynamic>
-                                : jsonDecode(bookings[index].toString()) as Map<String, dynamic>;
+                                : jsonDecode(bookings[index].toString())
+                                    as Map<String, dynamic>;
                             return _buildActiveJobCard(b);
                           },
                         );
@@ -357,8 +366,10 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                     FutureBuilder<List<dynamic>>(
                       future: _historyBookings,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Center(child: CircularProgressIndicator());
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                              child: CircularProgressIndicator());
                         }
                         final bookings = snapshot.data ?? [];
                         if (bookings.isEmpty) {
@@ -372,7 +383,8 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                           itemBuilder: (context, index) {
                             final b = bookings[index] is Map
                                 ? bookings[index] as Map<String, dynamic>
-                                : jsonDecode(bookings[index].toString()) as Map<String, dynamic>;
+                                : jsonDecode(bookings[index].toString())
+                                    as Map<String, dynamic>;
                             return _buildHistoryJobCard(b);
                           },
                         );
@@ -422,7 +434,8 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
             Icon(icon, size: 56, color: AppTheme.borderColor),
             const SizedBox(height: 12),
             Text(message,
-                style: const TextStyle(fontSize: 14, color: AppTheme.textSecondary),
+                style: const TextStyle(
+                    fontSize: 14, color: AppTheme.textSecondary),
                 textAlign: TextAlign.center),
           ],
         ),
@@ -454,21 +467,27 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
               Expanded(
                 child: Text(serviceName,
                     style: const TextStyle(
-                        fontWeight: FontWeight.w600, fontSize: 15, color: AppTheme.textPrimary)),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: AppTheme.textPrimary)),
               ),
               Text('\$$price',
                   style: const TextStyle(
-                      fontWeight: FontWeight.w700, fontSize: 15, color: AppTheme.primary)),
+                      fontWeight: FontWeight.w700,
+                      fontSize: 15,
+                      color: AppTheme.primary)),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.location_on_outlined, size: 15, color: AppTheme.textSecondary),
+              const Icon(Icons.location_on_outlined,
+                  size: 15, color: AppTheme.textSecondary),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(address,
-                    style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    style: const TextStyle(
+                        fontSize: 13, color: AppTheme.textSecondary),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis),
               ),
@@ -519,7 +538,7 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
       decoration: BoxDecoration(
         color: AppTheme.surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.primary.withValues(alpha: 0.3)),
+        border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -529,18 +548,22 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
             children: [
               Text(serviceName,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w600, fontSize: 15, color: AppTheme.textPrimary)),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: AppTheme.textPrimary)),
               _statusBadge(status),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              const Icon(Icons.location_on_outlined, size: 15, color: AppTheme.textSecondary),
+              const Icon(Icons.location_on_outlined,
+                  size: 15, color: AppTheme.textSecondary),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(address,
-                    style: const TextStyle(fontSize: 13, color: AppTheme.textSecondary),
+                    style: const TextStyle(
+                        fontSize: 13, color: AppTheme.textSecondary),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis),
               ),
@@ -551,7 +574,8 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
             children: [
               Expanded(
                 child: OutlinedButton.icon(
-                  onPressed: () => Navigator.pushNamed(context, '/chat', arguments: {
+                  onPressed: () =>
+                      Navigator.pushNamed(context, '/chat', arguments: {
                     'bookingId': bookingId,
                     'otherUserName': 'Customer',
                     'otherUserId': customerId,
@@ -651,8 +675,8 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
                 createdAt != null
                     ? '${createdAt.day}/${createdAt.month}/${createdAt.year}'
                     : '',
-                style: const TextStyle(
-                    fontSize: 11, color: AppTheme.textTertiary),
+                style:
+                    const TextStyle(fontSize: 11, color: AppTheme.textTertiary),
               ),
               Text('\$$price',
                   style: const TextStyle(
@@ -664,12 +688,12 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
           if (status == 'completed') ...[
             const SizedBox(height: 10),
             OutlinedButton.icon(
-              onPressed: () => Navigator.pushNamed(context, '/review',
-                  arguments: {
-                    'bookingId': bookingId,
-                    'technicianName': _technicianName ?? 'Technician',
-                    'technicianId': '',
-                  }),
+              onPressed: () =>
+                  Navigator.pushNamed(context, '/review', arguments: {
+                'bookingId': bookingId,
+                'technicianName': _technicianName ?? 'Technician',
+                'technicianId': '',
+              }),
               icon: const Icon(Icons.star_outline, size: 16),
               label: const Text('View Review'),
               style: OutlinedButton.styleFrom(
@@ -696,12 +720,13 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withOpacity(0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         status.replaceAll('_', ' '),
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
+        style:
+            TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
       ),
     );
   }
