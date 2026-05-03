@@ -18,6 +18,8 @@ import 'features/profile/screens/profile_screen.dart';
 import 'features/review/screens/review_screen.dart';
 import 'features/chat/screens/chat_screen.dart';
 import 'features/payment/screens/payout_screen.dart';
+import 'features/payment/screens/payment_checkout_screen.dart';
+import 'features/search/screens/search_screen.dart';
 import 'models/service.dart';
 
 void main() {
@@ -69,6 +71,13 @@ class FixMateApp extends StatelessWidget {
                 builder: (_) => const TechnicianProfileSetupScreen());
           case '/technician-payout':
             return MaterialPageRoute(builder: (_) => const PayoutScreen());
+          case '/payment-checkout':
+            final booking = settings.arguments as Map<String, dynamic>;
+            return MaterialPageRoute(
+              builder: (_) => PaymentCheckoutScreen(booking: booking),
+            );
+          case '/search':
+            return MaterialPageRoute(builder: (_) => const SearchScreen());
           case '/job-tracking':
             final args = settings.arguments as Map<String, String>;
             return MaterialPageRoute(

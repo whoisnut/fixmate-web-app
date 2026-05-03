@@ -56,8 +56,8 @@ const statusClass: Record<string, string> = {
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<ViewTab>("overview");
-  const [email, setEmail] = useState("demo.login@fixmate.dev");
-  const [password, setPassword] = useState("Pass1234");
+  const [email, setEmail] = useState("admin@fixmate.dev");
+  const [password, setPassword] = useState("Admin1234");
   const [token, setToken] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -148,6 +148,10 @@ export default function Home() {
         email,
         password,
       });
+      if (response.data.user.role !== "admin") {
+        setError("Access denied. This panel requires an admin account.");
+        return;
+      }
       localStorage.setItem("token", response.data.access_token);
       localStorage.setItem("admin_user", JSON.stringify(response.data.user));
       setToken(response.data.access_token);
@@ -369,9 +373,9 @@ export default function Home() {
             )}
 
             <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs text-slate-600">
-              <p className="font-semibold text-slate-800">Demo Credentials</p>
-              <p>Email: demo.login@fixmate.dev</p>
-              <p>Password: Pass1234</p>
+              <p className="font-semibold text-slate-800">Admin Credentials</p>
+              <p>Email: admin@fixmate.dev</p>
+              <p>Password: Admin1234</p>
             </div>
           </aside>
 

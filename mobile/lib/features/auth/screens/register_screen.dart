@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
@@ -96,6 +97,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
           AppConstants.tokenKey, response.data['access_token']);
       await prefs.setString(
           AppConstants.userKey, jsonEncode(response.data['user']));
+
+      // For customers, attempt to capture current location
+      if (_selectedRole == 'customer') {
+        try {
+          var permission = await Geolocator.checkPermission();
+          if (permission == LocationPermission.denied) {
+            permission = await Geolocator.requestPermission();
+          }
+          if (permission == LocationPermission.whileInUse ||
+              permission == LocationPermission.always) {
+            final pos = await Geolocator.getCurrentPosition();
+            await prefs.setDouble('user_lat', pos.latitude);
+            await prefs.setDouble('user_lng', pos.longitude);
+            await prefs.setString('user_address', 'Current Location');
+          }
+        } catch (_) {}
+      }
 
       if (mounted) {
         final route = _selectedRole == 'technician'

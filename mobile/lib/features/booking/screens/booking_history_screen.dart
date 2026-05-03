@@ -133,7 +133,7 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Booking #${(bookingId).substring(0, 8)}',
+                        'Booking #${bookingId.length >= 8 ? bookingId.substring(0, 8) : bookingId}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -175,7 +175,7 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
                   const Icon(Icons.schedule, size: 16, color: Colors.grey),
                   const SizedBox(width: 8),
                   Text(
-                    'Scheduled: ${booking['scheduled_at'] ?? 'N/A'}',
+                    'Scheduled: ${_formatDateTime(booking['scheduled_at'])}',
                     style: const TextStyle(color: AppTheme.textSecondary),
                   ),
                 ],
@@ -188,7 +188,7 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
                 const Icon(Icons.calendar_today, size: 16, color: Colors.grey),
                 const SizedBox(width: 8),
                 Text(
-                  'Created: ${booking['created_at'] ?? 'N/A'}',
+                  'Created: ${_formatDateTime(booking['created_at'])}',
                   style: const TextStyle(color: AppTheme.textSecondary),
                 ),
               ],
@@ -215,11 +215,51 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
               _buildTechnicianActions(context, ref, status, bookingId),
             ] else if (status == 'completed') ...[
               const SizedBox(height: 16),
-              TextButton(
-                onPressed: () {
-                  // TODO: Navigate to rating screen
-                },
-                child: const Text('Rate Service'),
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        final technicianId =
+                            booking['technician_id'] as String? ?? '';
+                        Navigator.pushNamed(context, '/review',
+                            arguments: {
+                              'bookingId': bookingId,
+                              'technicianName': 'Your Technician',
+                              'technicianId': technicianId,
+                            });
+                      },
+                      icon: const Icon(Icons.star_outline, size: 16),
+                      label: const Text('Rate'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: OutlinedButton.icon(
+                      onPressed: () => Navigator.pushNamed(
+                          context, '/payment-checkout',
+                          arguments: booking),
+                      icon: const Icon(Icons.payment, size: 16),
+                      label: const Text('Pay'),
+                    ),
+                  ),
+                ],
+              ),
+            ] else if (status == 'accepted' || status == 'in_progress') ...[
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => Navigator.pushNamed(context, '/job-tracking',
+                      arguments: {
+                        'bookingId': bookingId,
+                        'technicianName': 'Your Technician',
+                      }),
+                  icon: const Icon(Icons.location_on, size: 16),
+                  label: const Text('Track Job'),
+                  style: ElevatedButton.styleFrom(
+                      backgroundColor: AppTheme.primary),
+                ),
               ),
             ],
           ],
@@ -302,6 +342,15 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
     ref.invalidate(bookingsProvider);
   }
 
+  String _formatDateTime(dynamic raw) {
+    if (raw == null) return 'N/A';
+    final dt = DateTime.tryParse(raw.toString());
+    if (dt == null) return raw.toString();
+    final local = dt.toLocal();
+    return '${local.day.toString().padLeft(2, '0')}/${local.month.toString().padLeft(2, '0')}/${local.year} '
+        '${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
+  }
+
   Color _getStatusColor(String status) {
     switch (status) {
       case 'pending':
@@ -324,7 +373,7 @@ class _BookingHistoryScreenState extends ConsumerState<BookingHistoryScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

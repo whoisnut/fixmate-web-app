@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/network/api_client.dart';
@@ -34,7 +35,16 @@ class _SplashScreenState extends State<SplashScreen> {
           if (!mounted) return;
 
           if (response.statusCode == 200) {
-            Navigator.pushReplacementNamed(context, AppRoutes.home);
+            final userJson = prefs.getString(AppConstants.userKey);
+            final role = userJson != null
+                ? (jsonDecode(userJson) as Map<String, dynamic>)['role'] as String?
+                : null;
+            if (!mounted) return;
+            if (role == 'technician') {
+              Navigator.pushReplacementNamed(context, AppRoutes.technicianHome);
+            } else {
+              Navigator.pushReplacementNamed(context, AppRoutes.home);
+            }
           } else {
             // Token invalid, go to login
             await prefs.remove(AppConstants.tokenKey);

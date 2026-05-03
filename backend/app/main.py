@@ -4,6 +4,8 @@ from app.core.config import settings
 from app.core.database import Base, SessionLocal, engine
 from app.models import user, service, booking  # noqa: F401 – registers all models
 from app.models.service import Category, Service
+from app.models.user import User
+from app.core.security import hash_password
 from app.routers import auth, services, bookings, profile, payments, payment_methods, reviews, admin, payouts, messages
 from app.routers import websocket as ws_router
 
@@ -176,7 +178,29 @@ def seed_demo_services() -> None:
         db.close()
 
 
+def seed_admin_user() -> None:
+    """Create a default admin account if none exists."""
+    db = SessionLocal()
+    try:
+        exists = db.query(User).filter(User.role == "admin").first()
+        if exists:
+            return
+        admin_user = User(
+            name="Admin",
+            email="admin@fixmate.dev",
+            phone="+0000000000",
+            password=hash_password("Admin1234"),
+            role="admin",
+            is_active=True,
+        )
+        db.add(admin_user)
+        db.commit()
+    finally:
+        db.close()
+
+
 seed_demo_services()
+seed_admin_user()
 
 app = FastAPI(title="FixMate API", description="On-demand technician booking", version="1.0.0")
 
