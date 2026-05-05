@@ -310,15 +310,6 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                     isActive: displayStatus == 'completed',
                     isCompleted: displayStatus == 'completed'),
                 const SizedBox(height: 20),
-<<<<<<< HEAD
-                SizedBox(
-                  width: double.infinity,
-                  height: 48,
-                  child: OutlinedButton.icon(
-                    onPressed: _currentUserId != null
-                        ? () =>
-                            Navigator.pushNamed(context, '/chat', arguments: {
-=======
                 if (_jobStatus == 'completed') ...[
                   Row(
                     children: [
@@ -343,7 +334,6 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                             context,
                             '/review',
                             arguments: {
->>>>>>> 6e87012b2b3d3a7389c8900d627fcec7ac98db8c
                               'bookingId': widget.bookingId,
                               'technicianName': widget.technicianName,
                               'technicianId': _otherUserId ?? '',

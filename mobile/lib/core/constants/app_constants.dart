@@ -23,15 +23,15 @@ class AppConstants {
 
   // Default API base URL for development
   static const String apiBaseUrl = 'http://localhost:8000';
-  static const String apiVersion = '/api/v1';
+  static const String apiVersion = '/api/v1.0.0';
 
   // API Endpoints
-  static const String authRegister = '/api/auth/register';
-  static const String authLogin = '/api/auth/login';
-  static const String categoriesEndpoint = '/api/categories';
-  static const String servicesEndpoint = '/api/services';
-  static const String bookingsEndpoint = '/api/bookings';
-  static const String profileEndpoint = '/api/profile';
+  static const String authRegister = 'auth/register';
+  static const String authLogin = 'auth/login';
+  static const String categoriesEndpoint = 'services/categories';
+  static const String servicesEndpoint = 'services';
+  static const String bookingsEndpoint = 'bookings';
+  static const String profileEndpoint = 'profile';
 
   // Storage keys
   static const String tokenKey = 'auth_token';

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useMemo, useState } from "react";
-import api from "@/lib/api";
+import { useEffect, useMemo, useState } from 'react';
+import api from '@/lib/api';
 
 type User = {
   id: string;
@@ -44,45 +44,45 @@ type Booking = {
   status: string;
 };
 
-type ViewTab = "overview" | "categories" | "services" | "bookings";
+type ViewTab = 'overview' | 'categories' | 'services' | 'bookings';
 
 const statusClass: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800 border-amber-200",
-  accepted: "bg-blue-100 text-blue-800 border-blue-200",
-  in_progress: "bg-indigo-100 text-indigo-800 border-indigo-200",
-  completed: "bg-emerald-100 text-emerald-800 border-emerald-200",
-  cancelled: "bg-rose-100 text-rose-800 border-rose-200",
+  pending: 'bg-amber-100 text-amber-800 border-amber-200',
+  accepted: 'bg-blue-100 text-blue-800 border-blue-200',
+  in_progress: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+  completed: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  cancelled: 'bg-rose-100 text-rose-800 border-rose-200',
 };
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<ViewTab>("overview");
-  const [email, setEmail] = useState("admin@fixmate.dev");
-  const [password, setPassword] = useState("Admin1234");
+  const [activeTab, setActiveTab] = useState<ViewTab>('overview');
+  const [email, setEmail] = useState('admin@fixmate.dev');
+  const [password, setPassword] = useState('Admin1234');
   const [token, setToken] = useState<string | null>(null);
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [services, setServices] = useState<Service[]>([]);
   const [bookings, setBookings] = useState<Booking[]>([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string>("all");
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('all');
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthLoading, setIsAuthLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  const [categoryName, setCategoryName] = useState("");
-  const [categoryIcon, setCategoryIcon] = useState("");
-  const [categoryColor, setCategoryColor] = useState("#0EA5E9");
+  const [categoryName, setCategoryName] = useState('');
+  const [categoryIcon, setCategoryIcon] = useState('');
+  const [categoryColor, setCategoryColor] = useState('#0EA5E9');
 
-  const [serviceName, setServiceName] = useState("");
-  const [serviceDescription, setServiceDescription] = useState("");
-  const [serviceMinPrice, setServiceMinPrice] = useState("0");
-  const [serviceMaxPrice, setServiceMaxPrice] = useState("0");
-  const [serviceUrgency, setServiceUrgency] = useState("1");
-  const [serviceCategoryId, setServiceCategoryId] = useState("");
+  const [serviceName, setServiceName] = useState('');
+  const [serviceDescription, setServiceDescription] = useState('');
+  const [serviceMinPrice, setServiceMinPrice] = useState('0');
+  const [serviceMaxPrice, setServiceMaxPrice] = useState('0');
+  const [serviceUrgency, setServiceUrgency] = useState('1');
+  const [serviceCategoryId, setServiceCategoryId] = useState('');
 
   useEffect(() => {
-    const storedToken = localStorage.getItem("token");
-    const storedUser = localStorage.getItem("admin_user");
+    const storedToken = localStorage.getItem('token');
+    const storedUser = localStorage.getItem('admin_user');
     if (storedToken) {
       setToken(storedToken);
     }
@@ -102,20 +102,26 @@ export default function Home() {
   }, [token]);
 
   const filteredServices = useMemo(() => {
-    if (selectedCategoryId === "all") return services;
-    return services.filter((service) => service.category_id === selectedCategoryId);
+    if (selectedCategoryId === 'all') return services;
+    return services.filter(
+      (service) => service.category_id === selectedCategoryId,
+    );
   }, [services, selectedCategoryId]);
 
-  const completedCount = bookings.filter((booking) => booking.status === "completed").length;
-  const pendingCount = bookings.filter((booking) => booking.status === "pending").length;
+  const completedCount = bookings.filter(
+    (booking) => booking.status === 'completed',
+  ).length;
+  const pendingCount = bookings.filter(
+    (booking) => booking.status === 'pending',
+  ).length;
 
   async function loadPublicData() {
     setIsLoading(true);
     setError(null);
     try {
       const [categoriesRes, servicesRes] = await Promise.all([
-        api.get<Category[]>("/api/categories"),
-        api.get<Service[]>("/api/services"),
+        api.get<Category[]>('/api/services/categories'),
+        api.get<Service[]>('/api/services'),
       ]);
       setCategories(categoriesRes.data);
       setServices(servicesRes.data);
@@ -123,7 +129,9 @@ export default function Home() {
         setServiceCategoryId(categoriesRes.data[0].id);
       }
     } catch (requestError) {
-      setError("Failed to load categories/services. Make sure backend is running.");
+      setError(
+        'Failed to load categories/services. Make sure backend is running.',
+      );
       console.error(requestError);
     } finally {
       setIsLoading(false);
@@ -132,7 +140,7 @@ export default function Home() {
 
   async function loadBookings() {
     try {
-      const res = await api.get<Booking[]>("/api/bookings");
+      const res = await api.get<Booking[]>('/api/bookings/');
       setBookings(res.data);
     } catch (requestError) {
       console.error(requestError);
@@ -144,21 +152,21 @@ export default function Home() {
     setIsAuthLoading(true);
     setError(null);
     try {
-      const response = await api.post<LoginResponse>("/api/auth/login", {
+      const response = await api.post<LoginResponse>('/api/auth/login', {
         email,
         password,
       });
-      if (response.data.user.role !== "admin") {
-        setError("Access denied. This panel requires an admin account.");
+      if (response.data.user.role !== 'admin') {
+        setError('Access denied. This panel requires an admin account.');
         return;
       }
-      localStorage.setItem("token", response.data.access_token);
-      localStorage.setItem("admin_user", JSON.stringify(response.data.user));
+      localStorage.setItem('token', response.data.access_token);
+      localStorage.setItem('admin_user', JSON.stringify(response.data.user));
       setToken(response.data.access_token);
       setCurrentUser(response.data.user);
       await loadBookings();
     } catch (requestError) {
-      setError("Login failed. Check credentials and backend.");
+      setError('Login failed. Check credentials and backend.');
       console.error(requestError);
     } finally {
       setIsAuthLoading(false);
@@ -166,8 +174,8 @@ export default function Home() {
   }
 
   function handleLogout() {
-    localStorage.removeItem("token");
-    localStorage.removeItem("admin_user");
+    localStorage.removeItem('token');
+    localStorage.removeItem('admin_user');
     setToken(null);
     setCurrentUser(null);
     setBookings([]);
@@ -180,7 +188,7 @@ export default function Home() {
       setNotice(`Booking status updated to ${status}`);
     } catch (requestError) {
       console.error(requestError);
-      setError("Unable to update booking status for this user role.");
+      setError('Unable to update booking status for this user role.');
     }
   }
 
@@ -189,18 +197,18 @@ export default function Home() {
     setError(null);
     setNotice(null);
     try {
-      await api.post("/api/categories", {
+      await api.post('/api/services/categories', {
         name: categoryName,
         icon: categoryIcon || null,
         color_hex: categoryColor,
       });
-      setCategoryName("");
-      setCategoryIcon("");
+      setCategoryName('');
+      setCategoryIcon('');
       await loadPublicData();
-      setNotice("Category created.");
+      setNotice('Category created.');
     } catch (requestError) {
       console.error(requestError);
-      setError("Unable to create category. Login required.");
+      setError('Unable to create category. Login required.');
     }
   }
 
@@ -208,14 +216,14 @@ export default function Home() {
     setError(null);
     setNotice(null);
     try {
-      await api.put(`/api/categories/${category.id}`, {
+      await api.put(`/api/services/categories/${category.id}`, {
         is_active: !category.is_active,
       });
       await loadPublicData();
-      setNotice("Category updated.");
+      setNotice('Category updated.');
     } catch (requestError) {
       console.error(requestError);
-      setError("Unable to update category.");
+      setError('Unable to update category.');
     }
   }
 
@@ -223,12 +231,12 @@ export default function Home() {
     setError(null);
     setNotice(null);
     try {
-      await api.delete(`/api/categories/${categoryId}`);
+      await api.delete(`/api/services/categories/${categoryId}`);
       await loadPublicData();
-      setNotice("Category deactivated.");
+      setNotice('Category deactivated.');
     } catch (requestError) {
       console.error(requestError);
-      setError("Unable to delete category.");
+      setError('Unable to delete category.');
     }
   }
 
@@ -237,7 +245,7 @@ export default function Home() {
     setError(null);
     setNotice(null);
     try {
-      await api.post("/api/services", {
+      await api.post('/api/services', {
         category_id: serviceCategoryId,
         name: serviceName,
         description: serviceDescription || null,
@@ -246,16 +254,16 @@ export default function Home() {
         urgency_level: Number(serviceUrgency),
         is_active: true,
       });
-      setServiceName("");
-      setServiceDescription("");
-      setServiceMinPrice("0");
-      setServiceMaxPrice("0");
-      setServiceUrgency("1");
+      setServiceName('');
+      setServiceDescription('');
+      setServiceMinPrice('0');
+      setServiceMaxPrice('0');
+      setServiceUrgency('1');
       await loadPublicData();
-      setNotice("Service created.");
+      setNotice('Service created.');
     } catch (requestError) {
       console.error(requestError);
-      setError("Unable to create service. Login required.");
+      setError('Unable to create service. Login required.');
     }
   }
 
@@ -267,10 +275,10 @@ export default function Home() {
         is_active: !service.is_active,
       });
       await loadPublicData();
-      setNotice("Service updated.");
+      setNotice('Service updated.');
     } catch (requestError) {
       console.error(requestError);
-      setError("Unable to update service.");
+      setError('Unable to update service.');
     }
   }
 
@@ -280,10 +288,10 @@ export default function Home() {
     try {
       await api.delete(`/api/services/${serviceId}`);
       await loadPublicData();
-      setNotice("Service deactivated.");
+      setNotice('Service deactivated.');
     } catch (requestError) {
       console.error(requestError);
-      setError("Unable to delete service.");
+      setError('Unable to delete service.');
     }
   }
 
@@ -292,9 +300,13 @@ export default function Home() {
       <div className="mx-auto max-w-7xl">
         <header className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-slate-200 bg-white/80 p-5 shadow-sm backdrop-blur">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">FixMate Control Center</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-700">
+              FixMate Control Center
+            </p>
             <h1 className="mt-1 text-3xl font-semibold">Web Admin Panel</h1>
-            <p className="text-sm text-slate-600">Manage categories, services, and live booking operations.</p>
+            <p className="text-sm text-slate-600">
+              Manage categories, services, and live booking operations.
+            </p>
           </div>
           <div className="flex items-center gap-3">
             <button
@@ -319,14 +331,38 @@ export default function Home() {
           </div>
         </header>
 
-        {error ? <p className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</p> : null}
-        {notice ? <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{notice}</p> : null}
+        {error ? (
+          <p className="mb-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            {error}
+          </p>
+        ) : null}
+        {notice ? (
+          <p className="mb-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+            {notice}
+          </p>
+        ) : null}
 
         <section className="mb-6 grid gap-4 md:grid-cols-4">
-          <StatCard label="Categories" value={categories.length.toString()} tone="sky" />
-          <StatCard label="Services" value={services.length.toString()} tone="indigo" />
-          <StatCard label="Bookings" value={bookings.length.toString()} tone="amber" />
-          <StatCard label="Completed Jobs" value={completedCount.toString()} tone="emerald" />
+          <StatCard
+            label="Categories"
+            value={categories.length.toString()}
+            tone="sky"
+          />
+          <StatCard
+            label="Services"
+            value={services.length.toString()}
+            tone="indigo"
+          />
+          <StatCard
+            label="Bookings"
+            value={bookings.length.toString()}
+            tone="amber"
+          />
+          <StatCard
+            label="Completed Jobs"
+            value={completedCount.toString()}
+            tone="emerald"
+          />
         </section>
 
         <section className="grid gap-6 lg:grid-cols-[340px_1fr]">
@@ -337,12 +373,16 @@ export default function Home() {
                 <p className="font-semibold">Signed in as {currentUser.name}</p>
                 <p className="mt-1">{currentUser.email}</p>
                 <p className="mt-1 capitalize">Role: {currentUser.role}</p>
-                <p className="mt-3 text-xs text-emerald-700">Bookings tab supports actions based on this role permissions.</p>
+                <p className="mt-3 text-xs text-emerald-700">
+                  Bookings tab supports actions based on this role permissions.
+                </p>
               </div>
             ) : (
               <form className="space-y-3" onSubmit={handleLogin}>
                 <label className="block">
-                  <span className="mb-1 block text-sm font-medium text-slate-700">Email</span>
+                  <span className="mb-1 block text-sm font-medium text-slate-700">
+                    Email
+                  </span>
                   <input
                     value={email}
                     onChange={(event) => setEmail(event.target.value)}
@@ -352,7 +392,9 @@ export default function Home() {
                   />
                 </label>
                 <label className="block">
-                  <span className="mb-1 block text-sm font-medium text-slate-700">Password</span>
+                  <span className="mb-1 block text-sm font-medium text-slate-700">
+                    Password
+                  </span>
                   <input
                     type="password"
                     value={password}
@@ -367,7 +409,7 @@ export default function Home() {
                   disabled={isAuthLoading}
                   className="w-full rounded-lg bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-500 disabled:cursor-not-allowed disabled:opacity-70"
                 >
-                  {isAuthLoading ? "Signing in..." : "Sign In"}
+                  {isAuthLoading ? 'Signing in...' : 'Sign In'}
                 </button>
               </form>
             )}
@@ -381,34 +423,67 @@ export default function Home() {
 
           <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
             <nav className="mb-4 flex flex-wrap gap-2">
-              <TabButton active={activeTab === "overview"} onClick={() => setActiveTab("overview")}>
+              <TabButton
+                active={activeTab === 'overview'}
+                onClick={() => setActiveTab('overview')}
+              >
                 Overview
               </TabButton>
-              <TabButton active={activeTab === "categories"} onClick={() => setActiveTab("categories")}>
+              <TabButton
+                active={activeTab === 'categories'}
+                onClick={() => setActiveTab('categories')}
+              >
                 Categories
               </TabButton>
-              <TabButton active={activeTab === "services"} onClick={() => setActiveTab("services")}>
+              <TabButton
+                active={activeTab === 'services'}
+                onClick={() => setActiveTab('services')}
+              >
                 Services
               </TabButton>
-              <TabButton active={activeTab === "bookings"} onClick={() => setActiveTab("bookings")}>
+              <TabButton
+                active={activeTab === 'bookings'}
+                onClick={() => setActiveTab('bookings')}
+              >
                 Bookings
               </TabButton>
             </nav>
 
-            {isLoading ? <p className="text-sm text-slate-600">Loading data...</p> : null}
+            {isLoading ? (
+              <p className="text-sm text-slate-600">Loading data...</p>
+            ) : null}
 
-            {!isLoading && activeTab === "overview" ? (
+            {!isLoading && activeTab === 'overview' ? (
               <div className="grid gap-3 md:grid-cols-2">
-                <InfoCard title="Active Categories" value={`${categories.length}`} subtitle="Current vehicle category set" />
-                <InfoCard title="Pending Bookings" value={`${pendingCount}`} subtitle="Requires technician action" />
-                <InfoCard title="Service Catalog" value={`${services.length}`} subtitle="Granular service tasks available" />
-                <InfoCard title="Completed Bookings" value={`${completedCount}`} subtitle="Finished jobs" />
+                <InfoCard
+                  title="Active Categories"
+                  value={`${categories.length}`}
+                  subtitle="Current vehicle category set"
+                />
+                <InfoCard
+                  title="Pending Bookings"
+                  value={`${pendingCount}`}
+                  subtitle="Requires technician action"
+                />
+                <InfoCard
+                  title="Service Catalog"
+                  value={`${services.length}`}
+                  subtitle="Granular service tasks available"
+                />
+                <InfoCard
+                  title="Completed Bookings"
+                  value={`${completedCount}`}
+                  subtitle="Finished jobs"
+                />
               </div>
             ) : null}
 
-            {!isLoading && activeTab === "categories" ? (
+            {!isLoading && activeTab === 'categories' ? (
               <div className="space-y-4">
-                <form onSubmit={createCategory} className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-4">
+                <form
+                  onSubmit={createCategory}
+                  className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-4"
+                >
                   <input
                     value={categoryName}
                     onChange={(event) => setCategoryName(event.target.value)}
@@ -435,19 +510,30 @@ export default function Home() {
 
                 <div className="grid gap-3 md:grid-cols-2">
                   {categories.map((category) => (
-                    <div key={category.id} className="rounded-xl border border-slate-200 p-4">
+                    <div
+                      key={category.id}
+                      className="rounded-xl border border-slate-200 p-4"
+                    >
                       <div className="mb-2 flex items-center justify-between">
-                        <h3 className="text-lg font-semibold">{category.name}</h3>
-                        <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">{category.is_active ? "Active" : "Inactive"}</span>
+                        <h3 className="text-lg font-semibold">
+                          {category.name}
+                        </h3>
+                        <span className="rounded-full bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+                          {category.is_active ? 'Active' : 'Inactive'}
+                        </span>
                       </div>
-                      <p className="text-xs text-slate-500">Icon: {category.icon ?? "-"}</p>
-                      <p className="text-xs text-slate-500">Color: {category.color_hex}</p>
+                      <p className="text-xs text-slate-500">
+                        Icon: {category.icon ?? '-'}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        Color: {category.color_hex}
+                      </p>
                       <div className="mt-3 flex gap-2">
                         <button
                           onClick={() => void toggleCategoryActive(category)}
                           className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-100"
                         >
-                          {category.is_active ? "Deactivate" : "Activate"}
+                          {category.is_active ? 'Deactivate' : 'Activate'}
                         </button>
                         <button
                           onClick={() => void deleteCategory(category.id)}
@@ -462,13 +548,18 @@ export default function Home() {
               </div>
             ) : null}
 
-            {!isLoading && activeTab === "services" ? (
+            {!isLoading && activeTab === 'services' ? (
               <div className="space-y-4">
-                <form onSubmit={createService} className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-6">
+                <form
+                  onSubmit={createService}
+                  className="grid gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4 md:grid-cols-6"
+                >
                   <select
                     className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     value={serviceCategoryId}
-                    onChange={(event) => setServiceCategoryId(event.target.value)}
+                    onChange={(event) =>
+                      setServiceCategoryId(event.target.value)
+                    }
                     required
                   >
                     {categories.map((category) => (
@@ -486,7 +577,9 @@ export default function Home() {
                   />
                   <input
                     value={serviceDescription}
-                    onChange={(event) => setServiceDescription(event.target.value)}
+                    onChange={(event) =>
+                      setServiceDescription(event.target.value)
+                    }
                     placeholder="Description"
                     className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
                   />
@@ -511,23 +604,31 @@ export default function Home() {
                   <div className="flex gap-2">
                     <select
                       value={serviceUrgency}
-                      onChange={(event) => setServiceUrgency(event.target.value)}
+                      onChange={(event) =>
+                        setServiceUrgency(event.target.value)
+                      }
                       className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     >
                       <option value="1">L1</option>
                       <option value="2">L2</option>
                       <option value="3">L3</option>
                     </select>
-                    <button className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700">Add</button>
+                    <button className="rounded-lg bg-slate-900 px-3 py-2 text-sm font-medium text-white hover:bg-slate-700">
+                      Add
+                    </button>
                   </div>
                 </form>
 
                 <div className="mb-3 flex flex-wrap items-center gap-2">
-                  <label className="text-sm font-medium text-slate-700">Filter by category</label>
+                  <label className="text-sm font-medium text-slate-700">
+                    Filter by category
+                  </label>
                   <select
                     className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
                     value={selectedCategoryId}
-                    onChange={(event) => setSelectedCategoryId(event.target.value)}
+                    onChange={(event) =>
+                      setSelectedCategoryId(event.target.value)
+                    }
                   >
                     <option value="all">All</option>
                     {categories.map((category) => (
@@ -551,21 +652,34 @@ export default function Home() {
                     </thead>
                     <tbody>
                       {filteredServices.map((service) => (
-                        <tr key={service.id} className="border-t border-slate-100">
+                        <tr
+                          key={service.id}
+                          className="border-t border-slate-100"
+                        >
                           <td className="px-3 py-2">
                             <p className="font-medium">{service.name}</p>
-                            <p className="text-xs text-slate-500">{service.description ?? "No description"}</p>
+                            <p className="text-xs text-slate-500">
+                              {service.description ?? 'No description'}
+                            </p>
                           </td>
-                          <td className="px-3 py-2">${service.min_price} - ${service.max_price}</td>
-                          <td className="px-3 py-2">L{service.urgency_level}</td>
-                          <td className="px-3 py-2">{service.is_active ? "Active" : "Inactive"}</td>
+                          <td className="px-3 py-2">
+                            ${service.min_price} - ${service.max_price}
+                          </td>
+                          <td className="px-3 py-2">
+                            L{service.urgency_level}
+                          </td>
+                          <td className="px-3 py-2">
+                            {service.is_active ? 'Active' : 'Inactive'}
+                          </td>
                           <td className="px-3 py-2">
                             <div className="flex gap-2">
                               <button
-                                onClick={() => void toggleServiceActive(service)}
+                                onClick={() =>
+                                  void toggleServiceActive(service)
+                                }
                                 className="rounded-md border border-slate-300 px-2 py-1 text-xs font-medium hover:bg-slate-100"
                               >
-                                {service.is_active ? "Deactivate" : "Activate"}
+                                {service.is_active ? 'Deactivate' : 'Activate'}
                               </button>
                               <button
                                 onClick={() => void deleteService(service.id)}
@@ -583,12 +697,16 @@ export default function Home() {
               </div>
             ) : null}
 
-            {!isLoading && activeTab === "bookings" ? (
+            {!isLoading && activeTab === 'bookings' ? (
               <div>
                 {!token ? (
-                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">Sign in to load and manage bookings.</p>
+                  <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                    Sign in to load and manage bookings.
+                  </p>
                 ) : bookings.length === 0 ? (
-                  <p className="text-sm text-slate-600">No bookings for this account.</p>
+                  <p className="text-sm text-slate-600">
+                    No bookings for this account.
+                  </p>
                 ) : (
                   <div className="overflow-x-auto rounded-xl border border-slate-200">
                     <table className="w-full text-left text-sm">
@@ -603,33 +721,55 @@ export default function Home() {
                       </thead>
                       <tbody>
                         {bookings.map((booking) => (
-                          <tr key={booking.id} className="border-t border-slate-100">
-                            <td className="px-3 py-2 font-medium">{booking.id.slice(0, 8)}</td>
+                          <tr
+                            key={booking.id}
+                            className="border-t border-slate-100"
+                          >
+                            <td className="px-3 py-2 font-medium">
+                              {booking.id.slice(0, 8)}
+                            </td>
                             <td className="px-3 py-2">{booking.address}</td>
-                            <td className="px-3 py-2">{new Date(booking.scheduled_at).toLocaleString()}</td>
                             <td className="px-3 py-2">
-                              <span className={`rounded-full border px-2 py-1 text-xs font-medium ${statusClass[booking.status] ?? "bg-slate-100 text-slate-700 border-slate-200"}`}>
+                              {new Date(booking.scheduled_at).toLocaleString()}
+                            </td>
+                            <td className="px-3 py-2">
+                              <span
+                                className={`rounded-full border px-2 py-1 text-xs font-medium ${statusClass[booking.status] ?? 'bg-slate-100 text-slate-700 border-slate-200'}`}
+                              >
                                 {booking.status}
                               </span>
                             </td>
                             <td className="px-3 py-2">
-                              {booking.status !== "cancelled" && booking.status !== "completed" ? (
+                              {booking.status !== 'cancelled' &&
+                              booking.status !== 'completed' ? (
                                 <div className="flex gap-2">
                                   <button
-                                    onClick={() => void updateBookingStatus(booking.id, "in_progress")}
+                                    onClick={() =>
+                                      void updateBookingStatus(
+                                        booking.id,
+                                        'in_progress',
+                                      )
+                                    }
                                     className="rounded-md bg-indigo-600 px-2 py-1 text-xs font-medium text-white hover:bg-indigo-500"
                                   >
                                     In Progress
                                   </button>
                                   <button
-                                    onClick={() => void updateBookingStatus(booking.id, "completed")}
+                                    onClick={() =>
+                                      void updateBookingStatus(
+                                        booking.id,
+                                        'completed',
+                                      )
+                                    }
                                     className="rounded-md bg-emerald-600 px-2 py-1 text-xs font-medium text-white hover:bg-emerald-500"
                                   >
                                     Complete
                                   </button>
                                 </div>
                               ) : (
-                                <span className="text-xs text-slate-400">No actions</span>
+                                <span className="text-xs text-slate-400">
+                                  No actions
+                                </span>
                               )}
                             </td>
                           </tr>
@@ -647,12 +787,22 @@ export default function Home() {
   );
 }
 
-function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function TabButton({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
   return (
     <button
       onClick={onClick}
       className={`rounded-lg px-3 py-2 text-sm font-medium transition ${
-        active ? "bg-slate-900 text-white" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-100"
+        active
+          ? 'bg-slate-900 text-white'
+          : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-100'
       }`}
     >
       {children}
@@ -660,23 +810,41 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
   );
 }
 
-function StatCard({ label, value, tone }: { label: string; value: string; tone: "sky" | "indigo" | "amber" | "emerald" }) {
+function StatCard({
+  label,
+  value,
+  tone,
+}: {
+  label: string;
+  value: string;
+  tone: 'sky' | 'indigo' | 'amber' | 'emerald';
+}) {
   const toneClass = {
-    sky: "border-sky-200 bg-sky-50 text-sky-900",
-    indigo: "border-indigo-200 bg-indigo-50 text-indigo-900",
-    amber: "border-amber-200 bg-amber-50 text-amber-900",
-    emerald: "border-emerald-200 bg-emerald-50 text-emerald-900",
+    sky: 'border-sky-200 bg-sky-50 text-sky-900',
+    indigo: 'border-indigo-200 bg-indigo-50 text-indigo-900',
+    amber: 'border-amber-200 bg-amber-50 text-amber-900',
+    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-900',
   }[tone];
 
   return (
     <article className={`rounded-xl border p-4 ${toneClass}`}>
-      <p className="text-xs font-semibold uppercase tracking-wide opacity-80">{label}</p>
+      <p className="text-xs font-semibold uppercase tracking-wide opacity-80">
+        {label}
+      </p>
       <p className="mt-2 text-3xl font-semibold">{value}</p>
     </article>
   );
 }
 
-function InfoCard({ title, value, subtitle }: { title: string; value: string; subtitle: string }) {
+function InfoCard({
+  title,
+  value,
+  subtitle,
+}: {
+  title: string;
+  value: string;
+  subtitle: string;
+}) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4">
       <p className="text-sm text-slate-500">{title}</p>

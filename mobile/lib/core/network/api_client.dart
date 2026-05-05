@@ -18,7 +18,7 @@ class ApiClient {
 
   void _initializeDio() {
     dio = Dio(BaseOptions(
-      baseUrl: AppConstants.baseUrl,
+      baseUrl: '${AppConstants.baseUrl}${AppConstants.apiVersion}/',
       connectTimeout:
           const Duration(milliseconds: AppConstants.connectionTimeout),
       receiveTimeout: const Duration(milliseconds: AppConstants.receiveTimeout),
@@ -36,6 +36,14 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
+          // Handle legacy /api/ paths by removing the prefix so they work with versioned baseUrl
+          if (options.path.startsWith('/api/')) {
+            options.path = options.path.replaceFirst('/api/', '');
+          } else if (options.path.startsWith('/')) {
+            // Also remove leading slash for other paths to avoid bypassing versioned baseUrl
+            options.path = options.path.substring(1);
+          }
+
           try {
             _prefs = await SharedPreferences.getInstance();
             final token = _prefs.getString(AppConstants.tokenKey);
@@ -51,6 +59,14 @@ class ApiClient {
           if (response.statusCode == 401) {
             clearAuthToken();
           }
+
+          // Handle new backend response format: { data: { ... }, response_status: "success", ... }
+          if (response.data is Map &&
+              response.data.containsKey('data') &&
+              response.data.containsKey('response_status')) {
+            response.data = response.data['data'];
+          }
+
           return handler.next(response);
         },
         onError: (error, handler) {
