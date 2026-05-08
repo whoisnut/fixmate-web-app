@@ -38,12 +38,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
       description: 'Provide repair services',
       icon: Icons.build,
     ),
-    _RoleOption(
-      value: 'admin',
-      label: 'Admin',
-      description: 'Manage the platform',
-      icon: Icons.admin_panel_settings,
-    ),
   ];
 
   String _extractErrorMessage(Object error, String fallback) {
@@ -179,7 +173,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     return Expanded(
                       child: Padding(
                         padding: EdgeInsets.only(
-                          right: role.value != 'admin' ? 8 : 0,
+                          right: role.value != 'technician' ? 8 : 0,
                         ),
                         child: GestureDetector(
                           onTap: () =>

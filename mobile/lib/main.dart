@@ -6,6 +6,7 @@ import 'core/constants/app_constants.dart';
 import 'features/auth/screens/splash_screen.dart';
 import 'features/auth/screens/onboarding_screen.dart';
 import 'features/auth/screens/login_screen.dart';
+import 'features/auth/screens/technician_login_screen.dart';
 import 'features/auth/screens/register_screen.dart';
 import 'features/home/screens/home_screen.dart';
 import 'features/technician/screens/technician_home_screen.dart';
@@ -44,6 +45,8 @@ class FixMateApp extends StatelessWidget {
             return MaterialPageRoute(builder: (_) => const OnboardingScreen());
           case AppRoutes.login:
             return MaterialPageRoute(builder: (_) => const LoginScreen());
+          case AppRoutes.technicianLogin:
+            return MaterialPageRoute(builder: (_) => const TechnicianLoginScreen());
           case AppRoutes.register:
             return MaterialPageRoute(builder: (_) => const RegisterScreen());
           case AppRoutes.home:
