@@ -191,7 +191,7 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                         border: Border.all(color: AppTheme.borderColor),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.08),
+                            color: Colors.black.withOpacity(0.08),
                             blurRadius: 10,
                             offset: const Offset(0, -2),
                           ),
@@ -203,7 +203,7 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                             width: 48,
                             height: 48,
                             decoration: BoxDecoration(
-                              color: AppTheme.primary.withValues(alpha: 0.1),
+                              color: AppTheme.primary.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: const Icon(Icons.person, color: AppTheme.primary),
@@ -375,9 +375,9 @@ class _JobTrackingScreenState extends ConsumerState<JobTrackingScreen> {
                     width: 2,
                   ),
                   color: isCompleted
-                      ? Colors.green.withValues(alpha: 0.1)
+                      ? Colors.green.withOpacity(0.1)
                       : isActive
-                          ? AppTheme.primary.withValues(alpha: 0.1)
+                          ? AppTheme.primary.withOpacity(0.1)
                           : Colors.transparent,
                 ),
                 child: Center(

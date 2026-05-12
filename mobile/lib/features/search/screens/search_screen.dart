@@ -136,7 +136,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: AppTheme.primary.withValues(alpha: 0.08),
+                  color: AppTheme.primary.withOpacity(0.08),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(Icons.build, color: AppTheme.primary),
@@ -160,7 +160,7 @@ class _SearchScreenState extends State<SearchScreen> {
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
                             decoration: BoxDecoration(
-                              color: AppTheme.error.withValues(alpha: 0.1),
+                              color: AppTheme.error.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(4),
                             ),
                             child: const Text('URGENT',

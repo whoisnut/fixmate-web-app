@@ -195,7 +195,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
                       padding: const EdgeInsets.all(14),
                       decoration: BoxDecoration(
                         color: selected
-                            ? AppTheme.primary.withValues(alpha: 0.08)
+                            ? AppTheme.primary.withOpacity(0.08)
                             : Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
@@ -241,10 +241,10 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: AppTheme.primary.withValues(alpha: 0.05),
+              color: AppTheme.primary.withOpacity(0.05),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                  color: AppTheme.primary.withValues(alpha: 0.2)),
+                  color: AppTheme.primary.withOpacity(0.2)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

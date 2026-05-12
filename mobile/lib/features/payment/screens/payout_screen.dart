@@ -25,7 +25,11 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
   Future<void> _loadStats() async {
     try {
       final stats = await ProfileRepository().getTechnicianStats();
-      if (mounted) setState(() { _stats = stats; _statsLoading = false; });
+      if (mounted)
+        setState(() {
+          _stats = stats;
+          _statsLoading = false;
+        });
     } catch (_) {
       if (mounted) setState(() => _statsLoading = false);
     }
@@ -173,7 +177,7 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
             Container(
               padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
+                color: color.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Icon(icon, color: color, size: 22),
@@ -218,7 +222,7 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
           Container(
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: _methodColor(payout.method).withValues(alpha: 0.1),
+              color: _methodColor(payout.method).withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(_methodIcon(payout.method),
@@ -239,7 +243,7 @@ class _PayoutScreenState extends ConsumerState<PayoutScreen> {
                       padding: const EdgeInsets.symmetric(
                           horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(
-                        color: color.withValues(alpha: 0.1),
+                        color: color.withOpacity(0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(payout.status,
