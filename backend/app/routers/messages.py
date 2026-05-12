@@ -10,56 +10,6 @@ from datetime import datetime
 
 router = APIRouter(prefix="/api/messages", tags=["Messages"])
 
-@router.post("/{booking_id}", response_model=MessageResponse)
-def send_message(
-    booking_id: str,
-    message_data: MessageCreate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Send a message in a booking chat"""
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
-    if not booking:
-        raise HTTPException(status_code=404, detail="Booking not found")
-    
-    # Check if user is part of this booking
-    if current_user.id != booking.customer_id and current_user.id != booking.technician_id:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    message = Message(
-        booking_id=booking_id,
-        sender_id=current_user.id,
-        content=message_data.content
-    )
-    
-    db.add(message)
-    db.commit()
-    db.refresh(message)
-    return message
-
-@router.get("/{booking_id}", response_model=List[MessageResponse])
-def get_booking_messages(
-    booking_id: str,
-    limit: int = 50,
-    offset: int = 0,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Get all messages for a booking"""
-    booking = db.query(Booking).filter(Booking.id == booking_id).first()
-    if not booking:
-        raise HTTPException(status_code=404, detail="Booking not found")
-    
-    # Check if user is part of this booking
-    if current_user.id != booking.customer_id and current_user.id != booking.technician_id:
-        raise HTTPException(status_code=403, detail="Access denied")
-    
-    messages = db.query(Message).filter(
-        Message.booking_id == booking_id
-    ).order_by(Message.sent_at).offset(offset).limit(limit).all()
-    
-    return messages
-
 @router.get("/user/chats")
 def get_user_chats(
     current_user: User = Depends(get_current_user),
@@ -98,6 +48,54 @@ def get_user_chats(
         })
     
     return chats
+
+@router.post("/{booking_id}", response_model=MessageResponse)
+def send_message(
+    booking_id: str,
+    message_data: MessageCreate,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Send a message in a booking chat"""
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    if current_user.id != booking.customer_id and current_user.id != booking.technician_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    message = Message(
+        booking_id=booking_id,
+        sender_id=current_user.id,
+        content=message_data.content
+    )
+
+    db.add(message)
+    db.commit()
+    db.refresh(message)
+    return message
+
+@router.get("/{booking_id}", response_model=List[MessageResponse])
+def get_booking_messages(
+    booking_id: str,
+    limit: int = 50,
+    offset: int = 0,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Get all messages for a booking"""
+    booking = db.query(Booking).filter(Booking.id == booking_id).first()
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    if current_user.id != booking.customer_id and current_user.id != booking.technician_id:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    messages = db.query(Message).filter(
+        Message.booking_id == booking_id
+    ).order_by(Message.sent_at).offset(offset).limit(limit).all()
+
+    return messages
 
 @router.delete("/{message_id}")
 def delete_message(

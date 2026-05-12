@@ -64,8 +64,9 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
       Future.delayed(const Duration(milliseconds: 300), _scrollToBottom);
     } catch (e) {
       if (mounted) {
+        final msg = e.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error sending message: $e')),
+          SnackBar(content: Text(msg)),
         );
       }
     }
@@ -217,9 +218,10 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
               loading: () => const Center(
                 child: CircularProgressIndicator(),
               ),
-              error: (error, stack) => Center(
-                child: Text('Error: $error'),
-              ),
+              error: (error, stack) {
+                final msg = error.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
+                return Center(child: Text('Error: $msg'));
+              },
             ),
           ),
 
