@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { adminApi } from "@/lib/api";
+import { getStoredToken } from "@/lib/auth";
 
 type Review = {
   id: string;
@@ -45,6 +47,7 @@ function StarRating({ rating }: { rating: number }) {
 }
 
 export default function ReviewsPage() {
+  const router = useRouter();
   const [data, setData] = useState<ReviewsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +58,7 @@ export default function ReviewsPage() {
   const [suspendingId, setSuspendingId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!getStoredToken()) { router.replace("/"); return; }
     void fetchReviews();
   }, []);
 

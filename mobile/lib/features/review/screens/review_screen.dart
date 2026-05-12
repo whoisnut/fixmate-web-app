@@ -55,8 +55,9 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final msg = e.toString().replaceFirst(RegExp(r'^Exception:\s*'), '');
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text(msg)),
         );
       }
     } finally {
@@ -92,7 +93,7 @@ class _ReviewScreenState extends ConsumerState<ReviewScreen> {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: AppTheme.primary.withOpacity(0.1),
+                      color: AppTheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: const Icon(

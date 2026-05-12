@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import api from "@/lib/api";
+import { getStoredToken } from "@/lib/auth";
 
 type Technician = {
   id: string;
@@ -29,6 +31,7 @@ const statusColors: Record<string, string> = {
 };
 
 export default function TechnicianVerification() {
+  const router = useRouter();
   const [technicians, setTechnicians] = useState<Technician[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,6 +41,7 @@ export default function TechnicianVerification() {
   const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
+    if (!getStoredToken()) { router.replace("/"); return; }
     void fetchTechnicians();
   }, []);
 

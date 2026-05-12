@@ -7,9 +7,23 @@ from app.models.user import User, Technician
 from app.models.booking import Booking
 from app.models.service import Service
 from app.schemas.booking import BookingCreate, BookingResponse, BookingStatusUpdate
+from app.websockets.manager import manager
 from typing import List, Optional
 from datetime import datetime
 import math
+import asyncio
+
+def _broadcast_status(customer_id: str, booking_id: str, status: str) -> None:
+    """Fire-and-forget WebSocket status push to the customer."""
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            asyncio.ensure_future(manager.send(str(customer_id), {
+                "type": "booking_status",
+                "data": {"booking_id": str(booking_id), "status": status},
+            }))
+    except Exception:
+        pass
 
 def _haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     R = 6371.0
@@ -197,9 +211,9 @@ def accept_booking(
     technician = db.query(Technician).filter(Technician.user_id == current_user.id).first()
     booking.technician_id = technician.id
     booking.status = "accepted"
-    
     db.commit()
     db.refresh(booking)
+    _broadcast_status(booking.customer_id, booking.id, "accepted")
     return booking
 
 @router.post("/{booking_id}/reject")
@@ -243,6 +257,7 @@ def start_booking(
     booking.status = "in_progress"
     db.commit()
     db.refresh(booking)
+    _broadcast_status(booking.customer_id, booking.id, "in_progress")
     return booking
 
 @router.post("/{booking_id}/complete", response_model=BookingResponse)
@@ -268,9 +283,9 @@ def complete_booking(
     
     booking.status = "completed"
     technician.total_jobs += 1
-    
     db.commit()
     db.refresh(booking)
+    _broadcast_status(booking.customer_id, booking.id, "completed")
     return booking
 
 @router.delete("/{booking_id}")

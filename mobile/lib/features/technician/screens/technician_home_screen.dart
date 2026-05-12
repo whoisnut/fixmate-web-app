@@ -109,11 +109,15 @@ class _TechnicianHomeScreenState extends State<TechnicianHomeScreen> {
 
   Future<List<dynamic>> _fetchActiveBookings() async {
     try {
-      final response = await ApiClient().get('/api/bookings?status=accepted');
-      if (response.statusCode == 200) {
-        return response.data is List ? response.data as List : [];
-      }
-      return [];
+      final accepted = await ApiClient().get('/api/bookings?status=accepted');
+      final inProgress = await ApiClient().get('/api/bookings?status=in_progress');
+      final a = (accepted.statusCode == 200 && accepted.data is List)
+          ? accepted.data as List
+          : [];
+      final b = (inProgress.statusCode == 200 && inProgress.data is List)
+          ? inProgress.data as List
+          : [];
+      return [...a, ...b];
     } catch (_) {
       return [];
     }

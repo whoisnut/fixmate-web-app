@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import api, { adminApi } from "@/lib/api";
+import { getStoredToken } from "@/lib/auth";
 
 type Overview = {
   total_users: number;
@@ -36,6 +38,7 @@ type AnalyticsData = {
 const PERIOD_DAYS: Record<string, number> = { day: 1, week: 7, month: 30, year: 365 };
 
 export default function AnalyticsDashboard() {
+  const router = useRouter();
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +46,11 @@ export default function AnalyticsDashboard() {
   const [suspendingId, setSuspendingId] = useState<string | null>(null);
 
   useEffect(() => {
+    const token = getStoredToken();
+    if (!token) {
+      router.replace("/");
+      return;
+    }
     void fetchAnalytics();
   }, [period]);
 

@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import api from "@/lib/api";
+import { getStoredToken } from "@/lib/auth";
 
 type User = {
   id: string;
@@ -14,6 +16,7 @@ type User = {
 };
 
 export default function UserManagement() {
+  const router = useRouter();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,6 +26,7 @@ export default function UserManagement() {
   const [filterStatus, setFilterStatus] = useState("all");
 
   useEffect(() => {
+    if (!getStoredToken()) { router.replace("/"); return; }
     void fetchUsers();
   }, []);
 
